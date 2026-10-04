@@ -458,5 +458,51 @@
       }
     },
     "digest": "sha256:bb9f36aac7fe6bdfed045ec6c3726c46c2e71f958541194429444bf719663565"
+  },
+  "v1.14.3": {
+    "info": {
+      "schema_version": 1,
+      "release": {
+        "version": "v1.14.3",
+        "stage": "stable",
+        "source_commit": "fb3e8f501f47a29b0fa66a5bf31f0f36739750d3"
+      },
+      "content": {
+        "summary": {
+          "zh": "修复用量归档清理在 SQLite 瞬时争用下反复中断，完善 CPA v8 可视化配置兼容，并补齐 Safari / iOS 图标支持。",
+          "en": "Fixes archive cleanup interruptions under transient SQLite contention, completes CPA v8 visual-config compatibility, and adds Safari / iOS icon support."
+        },
+        "notes": {
+          "zh": "https://github.com/seakee/CPA-Manager-Plus/blob/v1.14.3/docs/release-notes/v1.14.3-zh.md",
+          "en": "https://github.com/seakee/CPA-Manager-Plus/blob/v1.14.3/docs/release-notes/v1.14.3-en.md"
+        }
+      },
+      "update": {
+        "breaking": false,
+        "migration_required": false,
+        "minimum_direct_upgrade_version": null,
+        "upgrade_guide_url": "https://github.com/seakee/CPA-Manager-Plus/releases/tag/v1.14.3"
+      },
+      "distribution": {
+        "docker": {
+          "image": "seakee/cpa-manager-plus",
+          "version_tag": "v1.14.3"
+        },
+        "native": {
+          "assets": [
+            "cpa-manager-plus_v1.14.3_darwin_amd64.tar.gz",
+            "cpa-manager-plus_v1.14.3_darwin_arm64.tar.gz",
+            "cpa-manager-plus_v1.14.3_linux_amd64.tar.gz",
+            "cpa-manager-plus_v1.14.3_linux_arm64.tar.gz",
+            "cpa-manager-plus_v1.14.3_windows_amd64.zip",
+            "cpa-manager-plus_v1.14.3_windows_arm64.zip"
+          ]
+        }
+      },
+      "compatibility": {
+        "minimum_cpa_version": "v7.3.4"
+      }
+    },
+    "digest": "sha256:afa123b15d79636049b63fe677ae820688e9fa43f5f890adeb01809e1ce67a80"
   }
 }
