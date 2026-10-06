@@ -32,7 +32,11 @@ import {
   openFixture,
   fixtureConfig,
 } from '../bin/ci/run-cpa-v8-qualification.mjs';
-import { createManagementManifest, validateEvidence } from '../bin/ci/validate-cpa-v8-evidence.mjs';
+import {
+  createManagementManifest,
+  createExternalManifest,
+  validateEvidence,
+} from '../bin/ci/validate-cpa-v8-evidence.mjs';
 
 const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cli = path.join(repo, 'bin/ci/run-cpa-v8-qualification.mjs');
@@ -492,6 +496,13 @@ describe('AQ-02 isolation, CLI and partial evidence', () => {
       m.cases.find((c) => c.id === 'AQ02-M33-real-exchange').expectations.every((e) => e.mandatory)
     ).toBe(true);
     expect(m.cases.some((c) => c.operationRef === 'USAGE-02')).toBe(true);
+  });
+  it('rejects mismatched revision and case-set instead of an empty successful run', () => {
+    expect(() => selectCases(createExternalManifest(), 'management-r2')).toThrow('SETUP_FAILED');
+    expect(() => selectCases(createManagementManifest(), 'external-safety-r3')).toThrow(
+      'SETUP_FAILED'
+    );
+    expect(selectCases(createExternalManifest(), 'external-safety-r3')).toHaveLength(50);
   });
   it.each([
     ['--execute'],

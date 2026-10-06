@@ -1,8 +1,55 @@
 # CPA v8 qualification evidence
 
+## AQ-03 r3 External safety fixtures
+
+The current manifest contains **64 declarations**, selecting **50 leaves in 28
+groups** through `--case-set external-safety-r3`. The remaining 14 entries keep
+other operations explicitly pending. Historical r1 and r2 manifests are retained
+by their original factories; their complete original leaves and reports remain
+the source for earlier coverage, not these pending declarations.
+
+The implementation base is `bda686bcdf93a1dcb1e71a3d8d6047323a0224e8`, the merge
+of AQ-02 #915. The frozen planning input is the same planning commit and Gate
+blob listed below, with scope revision r3. Schema 1, 16 operations, seven profiles
+and profile composition r1 remain unchanged.
+
+Only `GET /v8/management/config` is an External probe. Fixed fixture targets map
+to private loopback listeners. Logical `10.0.0.7` is mapped to loopback for a
+policy test; it does not prove physical private-network connectivity. All 3xx
+are rejected, including same-origin redirects. Each read uses its own direct
+agent, fixed resolution and peer/CA/SAN checks. The caller supplies no arbitrary
+URL, key, handler or proxy through the CLI. Reads have no automatic retries.
+
+DNS, TLS, headers, body and decoding share an active five-second maximum deadline.
+Encoded and decoded bodies are each capped at one MiB; headers at 32 KiB. Only
+identity and gzip JSON are accepted, with fatal UTF-8 and required-field checks.
+Negative fixtures use shorter deadlines to observe actual cancellation. TLS
+fixtures use owned OpenSSL-generated CA, valid and actually expired certificates;
+IPv6 requires a real `::1` listener. Missing tools or IPv6 fail setup rather than
+turning into skipped success. The tool image records OpenSSL and all helper hashes.
+
+The real AUTH/CFG leaves read the verified official CPA. A TLS front forwards the
+presented synthetic key to that same private CPA and is explicitly mediated
+evidence; it does not prove native upstream TLS. Transport/deny/stale observations
+remain harness or guard evidence with function capability `unknown`. Late response
+tests change the binding while an actual request is outstanding and reject its
+publication, including A-to-B-to-A. Profile projection rejects missing, duplicate,
+unaccepted or inappropriate evidence.
+
+Run the four focused test files (including `tests/cpaV8ExternalSafety.test.mjs`),
+then `npm run test:repo`. The isolated procedure below also applies to r3; use
+`external-safety-r3` and the current canonical manifest. Build from committed
+source and include `bin/ci/cpa-v8-external-fixtures.mjs` in the source/hash audit.
+Every runtime input remains local to the owned network-none container.
+
+Real user targets, explicit proxies, production clients/browser adapters and
+formal independent qualification remain pending. AQ-02 real refresh and OAuth
+exchange gaps are not cleared by r3. No profile, Phase4A or plugin activation is
+accepted by this runner or a passing fixture report.
+
 ## AQ-02 r2 management runner
 
-The checked-in manifest now contains **101 cases**: 95 management leaves in 36
+The historical r2 manifest contains **101 cases**: 95 management leaves in 36
 groups and six retained downstream declarations. The normal case set selects 92
 leaves. One natural-expiry leaf has its own case set. Real provider refresh and
 successful OAuth exchange remain required and unselected in this offline scope.

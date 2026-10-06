@@ -17,12 +17,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   createSeedManifest,
   createManagementManifest,
+  createExternalManifest,
   validateEvidence,
 } from '../bin/ci/validate-cpa-v8-evidence.mjs';
 
 describe('AQ-02 r2 immutable scope and r1 compatibility', () => {
-  it('keeps the checked-in manifest canonical and equal to the frozen r2 catalogue', () => {
-    expect(readFileSync(seedFile)).toEqual(encode(createManagementManifest()));
+  it('keeps the checked-in r3 manifest canonical and retains the frozen r2 catalogue', () => {
+    expect(readFileSync(seedFile)).toEqual(encode(createExternalManifest()));
     manifest = createManagementManifest();
     expect(check().validationStatus).toBe('manifest_valid');
   });
