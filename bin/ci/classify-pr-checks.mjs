@@ -52,6 +52,7 @@ const triggersFrontend = (filePath) =>
   filePath === 'bin/ci/validate-cpa-v8-evidence.mjs' ||
   filePath === 'bin/ci/run-cpa-v8-qualification.mjs' ||
   filePath === 'bin/ci/prepare-cpa-v8-artifact.py' ||
+  filePath === 'bin/ci/cpa-v8-external-fixtures.mjs' ||
   startsWithPath(filePath, 'bin/release');
 
 const triggersManagerServer = (filePath) =>

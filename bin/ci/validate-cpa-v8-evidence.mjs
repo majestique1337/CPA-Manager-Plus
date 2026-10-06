@@ -395,6 +395,100 @@ export function createManagementManifest() {
   return m;
 }
 
+export const EXTERNAL_GROUPS = [
+  ['AUTH-01', 'upstream-function', 'real-auth'],
+  ['CFG-01', 'upstream-function', 'real-config'],
+  ['CFG-01', 'harness-behavior', 'root prefix'],
+  ['AUTH-01', 'boundary-guard', 'private remote'],
+  ['AUTH-01', 'harness-behavior', 'ipv6'],
+  ['CFG-01', 'boundary-guard', 'effects'],
+  ['CFG-01', 'boundary-guard', 'methods-routes'],
+  ['AUTH-01', 'boundary-guard', 'raw-url'],
+  ['AUTH-01', 'boundary-guard', 'direct proxy'],
+  ['AUTH-01', 'harness-behavior', 'untrusted'],
+  ['AUTH-01', 'harness-behavior', 'expired'],
+  ['AUTH-01', 'harness-behavior', 'identity'],
+  ['AUTH-01', 'boundary-guard', 'same-origin'],
+  ['AUTH-01', 'boundary-guard', 'cross-origin downgrade userinfo'],
+  ['AUTH-01', 'upstream-function', 'real-missing real-wrong'],
+  ['AUTH-01', 'harness-behavior', 'dns refused'],
+  ['CFG-01', 'harness-behavior', 'dns tls headers body'],
+  ['CFG-01', 'harness-behavior', 'headers'],
+  ['CFG-01', 'harness-behavior', 'encoded gzip'],
+  ['CFG-01', 'harness-behavior', 'encoding gzip utf8 json truncated shape'],
+  ['AUTH-01', 'boundary-guard', 'pin'],
+  ['AUTH-01', 'boundary-guard', 'rebind'],
+  ['AUTH-01', 'boundary-guard', 'environment'],
+  ['CFG-01', 'harness-behavior', 'reported'],
+  ['CFG-01', 'harness-behavior', 'projection'],
+  ['CFG-01', 'boundary-guard', 'aba'],
+  ['AUTH-01', 'boundary-guard', 'scope'],
+  ['CFG-01', 'harness-behavior', 'cancel'],
+];
+
+export function createExternalManifest() {
+  const m = createManagementManifest();
+  m.revision = 'r3';
+  m.planInput.scopeRevision = 'r3';
+  m.cpampBaselineCommit = 'bda686bcdf93a1dcb1e71a3d8d6047323a0224e8';
+  // Keep prior manifests immutable. Other operations are pending declarations,
+  // never copies of r2 execution or substitutes for its original leaf coverage.
+  m.cases = createSeedManifest().cases.filter(
+    (c) => !['AUTH-01', 'CFG-01'].includes(c.operationRef)
+  );
+  for (const [kind, proofScope] of [
+    ['upstream-real', 'upstream-function'],
+    ['local-stub', 'harness-behavior'],
+    ['boundary-deny', 'boundary-guard'],
+  ]) {
+    m.fixtures.push({
+      id: 'CPA8-EXTERNAL-' + kind + '-r3',
+      revision: 'r3',
+      kind,
+      proofScope,
+      lifecycle: 'declared',
+      configProfileId: 'external-owned-r3',
+      modeProfileId: 'linux-amd64-network-none-r3',
+    });
+  }
+  for (const id of ['AUTH-01', 'CFG-01']) {
+    const op = m.operations.find((o) => o.id === id);
+    op.surfaces.push({ id: id + '-EXTERNAL-r3', ...fixtureSurface('read-only') });
+  }
+  const add = (number, operationRef, proofScope, variant) => {
+    const id = `AQ03-E${String(number).padStart(2, '0')}-${variant}`;
+    m.cases.push({
+      id,
+      operationRef,
+      profileRefs: m.profiles
+        .filter((p) => p.requiredOperationRefs.includes(operationRef))
+        .map((p) => p.id),
+      surfaceRefs: [
+        proofScope === 'upstream-function' ? operationRef + '-S1' : operationRef + '-EXTERNAL-r3',
+      ],
+      fixtureRef: m.fixtures.find(
+        (f) => f.id.startsWith('CPA8-EXTERNAL-') && f.proofScope === proofScope
+      ).id,
+      proofScope,
+      expectations: ['HTTP', 'STATE', 'CONTROL'].map((suffix) => ({
+        id: id + '-' + suffix,
+        mandatory: true,
+        checkCode: suffix === 'HTTP' ? 'FAILURE_BEHAVIOR' : 'POSTCONDITION',
+      })),
+      budgetRef: 'standard-r1',
+    });
+  };
+  EXTERNAL_GROUPS.forEach(([op, proof, variants], index) =>
+    variants.split(' ').forEach((variant) => add(index + 1, op, proof, variant))
+  );
+  add(1, 'CFG-01', 'upstream-function', 'real-config');
+  add(2, 'AUTH-01', 'upstream-function', 'real-auth');
+  add(2, 'CFG-01', 'harness-behavior', 'mediation');
+  add(5, 'CFG-01', 'harness-behavior', 'ipv6-config');
+  for (const variant of ['denied', 'forbidden']) add(15, 'AUTH-01', 'harness-behavior', variant);
+  return m;
+}
+
 const stamp = (stat) => [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeMs, stat.ctimeMs];
 const sameFile = (a, b) => equal(stamp(a), stamp(b));
 function boundedRead(filename, limit, code = 'INPUT_INVALID') {
@@ -463,10 +557,15 @@ function validateManifest(m) {
     'cases',
   ]);
   requireThat(
-    m.schemaVersion === 1 && m.contractId === CONTRACT && ['r1', 'r2'].includes(m.revision),
+    m.schemaVersion === 1 && m.contractId === CONTRACT && ['r1', 'r2', 'r3'].includes(m.revision),
     'SCHEMA_VERSION'
   );
-  const trustedManifest = m.revision === 'r2' ? createManagementManifest() : createSeedManifest();
+  const trustedManifest =
+    m.revision === 'r3'
+      ? createExternalManifest()
+      : m.revision === 'r2'
+        ? createManagementManifest()
+        : createSeedManifest();
   fields(m.planInput, Object.keys(PLAN_INPUT));
   fields(m.candidate, Object.keys(CANDIDATE));
   for (const key of ['operations', 'profiles', 'fixtures', 'cases']) list(m[key]);
@@ -619,7 +718,7 @@ function validateManifest(m) {
       ),
       'ARTIFACT_BINDING_INVALID'
     );
-  if (m.revision === 'r2') requireThat(equal(m.cases, trustedManifest.cases), 'COVERAGE_INVALID');
+  if (m.revision !== 'r1') requireThat(equal(m.cases, trustedManifest.cases), 'COVERAGE_INVALID');
   return { operations, profiles, fixtures, cases };
 }
 

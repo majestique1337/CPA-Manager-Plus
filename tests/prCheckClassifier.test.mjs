@@ -28,6 +28,8 @@ describe('PR check classifier', () => {
       'bin/ci/validate-cpa-v8-evidence.mjs',
       'bin/ci/run-cpa-v8-qualification.mjs',
       'bin/ci/prepare-cpa-v8-artifact.py',
+      'bin/ci/cpa-v8-external-fixtures.mjs',
+      'tests/cpaV8ExternalSafety.test.mjs',
       'tests/fixtures/cpa-v8-qualification/Dockerfile.runner',
       'tests/cpaV8QualificationRunner.test.mjs',
       'tests/fixtures/cpa-v8-qualification/manifest.json',

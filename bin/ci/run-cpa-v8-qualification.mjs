@@ -25,7 +25,7 @@ import { performance } from 'node:perf_hooks';
 
 const MiB = 1024 * 1024;
 const HERE = path.dirname(realpathSync(fileURLToPath(import.meta.url)));
-const { createManagementManifest, validateEvidence } = await import(
+const { createManagementManifest, createExternalManifest, validateEvidence } = await import(
   pathToFileURL(path.join(HERE, 'validate-cpa-v8-evidence.mjs')).href
 );
 const MANAGEMENT = '/v8/management';
@@ -1431,7 +1431,12 @@ export async function naturalExpiry(f, now = () => performance.now(), wait = del
 }
 
 export function selectCases(manifest, caseSet) {
+  if (caseSet === 'external-safety-r3') {
+    insist(manifest.revision === 'r3');
+    return manifest.cases.filter((c) => c.id.startsWith('AQ03-'));
+  }
   insist(['management-r2', 'oauth-expiry-r2'].includes(caseSet));
+  insist(manifest.revision === 'r2');
   return manifest.cases.filter(
     (c) =>
       c.id.startsWith('AQ02-') &&
@@ -1513,6 +1518,10 @@ function recordResult(report, result, spec, points, started, evidenceRoot, limit
     result.assertionOutcome === 'fail' ? 'unknown' : limited ? 'limited' : 'supported';
   result.reasonCode =
     result.assertionOutcome === 'fail' ? 'ASSERTION_FAILED' : limited ? 'COVERAGE_UNKNOWN' : 'NONE';
+  if (spec.proofScope !== 'upstream-function' && result.assertionOutcome === 'pass') {
+    result.capability = 'unknown';
+    result.reasonCode = 'COVERAGE_UNKNOWN';
+  }
   report.evidence.push({
     id,
     kind: 'sanitized-trace',
@@ -1555,6 +1564,7 @@ async function execute(options, manifest, manifestBytes) {
     'run-cpa-v8-qualification.mjs',
     'prepare-cpa-v8-artifact.py',
     'validate-cpa-v8-evidence.mjs',
+    'cpa-v8-external-fixtures.mjs',
   ];
   insist(
     sources.every(
@@ -1653,7 +1663,11 @@ async function execute(options, manifest, manifestBytes) {
             true
           );
         else {
-          const resultData = await dispatchManagement(spec, fixture);
+          const resultData = spec.id.startsWith('AQ03-')
+            ? await (
+                await import(pathToFileURL(path.join(HERE, 'cpa-v8-external-fixtures.mjs')).href)
+              ).dispatchExternal(spec, fixture)
+            : await dispatchManagement(spec, fixture);
           recordResult(
             report,
             result,
@@ -1758,7 +1772,7 @@ export async function runCli(argv) {
       (options.run
         ? !options.archive ||
           !options.outputParent ||
-          !['management-r2', 'oauth-expiry-r2'].includes(options.caseSet)
+          !['management-r2', 'oauth-expiry-r2', 'external-safety-r3'].includes(options.caseSet)
         : Object.keys(options).length !== 1)
     )
       return { exitCode: 2, summary: { validationStatus: 'invalid', errorCode: 'USAGE' } };
@@ -1767,8 +1781,20 @@ export async function runCli(argv) {
       return { exitCode: 1, summary: validation };
     const bytes = readOwnedFile(path.resolve(options.manifest));
     const manifest = JSON.parse(bytes);
-    insist(manifest.revision === 'r2' && same(manifest, createManagementManifest()));
+    insist(
+      ['r2', 'r3'].includes(manifest.revision) &&
+        same(
+          manifest,
+          manifest.revision === 'r3' ? createExternalManifest() : createManagementManifest()
+        )
+    );
     if (!options.run) return { exitCode: 0, summary: validation };
+    if (options.caseSet === 'external-safety-r3') {
+      const { cleanExternalEnvironment } = await import(
+        pathToFileURL(path.join(HERE, 'cpa-v8-external-fixtures.mjs')).href
+      );
+      cleanExternalEnvironment(process.env, process.execArgv);
+    }
     return await execute(options, manifest, bytes);
   } catch (error) {
     return { exitCode: 1, summary: { validationStatus: 'invalid', errorCode: safeCode(error) } };

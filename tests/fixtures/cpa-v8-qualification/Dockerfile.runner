@@ -1,10 +1,10 @@
 # AQ-02 tooling only. Linux amd64 official Node 24.13.0 / Debian bookworm.
 FROM node:24.13.0-bookworm-slim@sha256:46feb5752989c05b8606e6323fbbc3db667d14ade1c24f5d0d44d9ca9909d607
-RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+RUN apt-get update && apt-get install -y --no-install-recommends python3 openssl \
     && rm -rf /var/lib/apt/lists/*
 ARG RUNNER_COMMIT
 WORKDIR /opt/aq02
-COPY bin/ci/run-cpa-v8-qualification.mjs bin/ci/prepare-cpa-v8-artifact.py bin/ci/validate-cpa-v8-evidence.mjs ./
-RUN node --input-type=module -e 'import fs from "node:fs"; import crypto from "node:crypto"; import cp from "node:child_process"; const runnerCommit=process.env.RUNNER_COMMIT; if(!/^[a-f0-9]{40}$/.test(runnerCommit||""))process.exit(1); const files=Object.fromEntries(["run-cpa-v8-qualification.mjs","prepare-cpa-v8-artifact.py","validate-cpa-v8-evidence.mjs"].map(n=>[n,crypto.createHash("sha256").update(fs.readFileSync(n)).digest("hex")])); fs.writeFileSync("tool-identity.json",JSON.stringify({runnerCommit,files,node:process.versions.node,python:cp.execFileSync("/usr/bin/python3",["-I","-c","import platform; print(platform.python_version())"]).toString().trim(),libc:process.report.getReport().header.glibcVersionRuntime}));'
+COPY bin/ci/run-cpa-v8-qualification.mjs bin/ci/prepare-cpa-v8-artifact.py bin/ci/validate-cpa-v8-evidence.mjs bin/ci/cpa-v8-external-fixtures.mjs ./
+RUN node --input-type=module -e 'import fs from "node:fs"; import crypto from "node:crypto"; import cp from "node:child_process"; const runnerCommit=process.env.RUNNER_COMMIT; if(!/^[a-f0-9]{40}$/.test(runnerCommit||""))process.exit(1); const files=Object.fromEntries(["run-cpa-v8-qualification.mjs","prepare-cpa-v8-artifact.py","validate-cpa-v8-evidence.mjs","cpa-v8-external-fixtures.mjs"].map(n=>[n,crypto.createHash("sha256").update(fs.readFileSync(n)).digest("hex")])); fs.writeFileSync("tool-identity.json",JSON.stringify({runnerCommit,files,node:process.versions.node,python:cp.execFileSync("/usr/bin/python3",["-I","-c","import platform; print(platform.python_version())"]).toString().trim(),openssl:cp.execFileSync("/usr/bin/openssl",["version"]).toString().trim(),libc:process.report.getReport().header.glibcVersionRuntime}));'
 USER 10001
 ENTRYPOINT ["node", "/opt/aq02/run-cpa-v8-qualification.mjs"]
