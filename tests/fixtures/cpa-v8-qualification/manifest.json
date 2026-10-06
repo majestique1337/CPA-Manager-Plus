@@ -1,0 +1,949 @@
+{
+  "schemaVersion": 1,
+  "contractId": "cpamp-cpa-v8-qualification",
+  "revision": "r1",
+  "planInput": {
+    "planCommit": "85d4f9942049fb3fdbf8358a5d8a9d7624f110bd",
+    "gateBlobSha": "779860b2126a95b1878af6645497e95419ce1775",
+    "scopeRevision": "r1"
+  },
+  "cpampBaselineCommit": "f5d12c6ca4af1f36f087e8acd28e565c5a0ae655",
+  "candidate": {
+    "id": "CPA8-8.0.13-linux-amd64-plugin",
+    "version": "v8.0.13",
+    "sourceCommit": "d7914afdedca7af95ee974a42453dc49fc1388ce",
+    "os": "linux",
+    "arch": "amd64",
+    "variant": "plugin",
+    "assetName": "CLIProxyAPI_8.0.13_linux_amd64.tar.gz",
+    "declaredSha256": "50ecffb47fdd81c8c5a9825a73a7a905ab66342337e274f39c4276b92d3533f3",
+    "provenance": "declared"
+  },
+  "operations": [
+    {
+      "id": "AUTH-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "AUTH-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": true
+        }
+      ]
+    },
+    {
+      "id": "AUTH-02",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "AUTH-02-S1",
+          "transport": "http",
+          "ownerClass": "cpa-data-plane",
+          "method": "POST",
+          "pathTemplate": "/v1/chat/completions",
+          "effect": "model-request",
+          "authClass": "client-key",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "CFG-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "CFG-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": true
+        }
+      ]
+    },
+    {
+      "id": "CFG-02",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "CFG-02-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PUT",
+          "pathTemplate": "/v8/management/config",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CFG-02-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PATCH",
+          "pathTemplate": "/v8/management/config",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CFG-02-S3",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": true
+        }
+      ]
+    },
+    {
+      "id": "KEY-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "KEY-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config/access/api-keys",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "KEY-02",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "KEY-02-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PUT",
+          "pathTemplate": "/v8/management/config/access/api-keys",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "KEY-02-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PATCH",
+          "pathTemplate": "/v8/management/config/access/api-keys",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "KEY-02-S3",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "DELETE",
+          "pathTemplate": "/v8/management/config/access/api-keys",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "KEY-02-S4",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config/access/api-keys",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "CRED-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "CRED-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/credentials",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "CRED-02",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "CRED-02-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "POST",
+          "pathTemplate": "/v8/management/credentials",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CRED-02-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "DELETE",
+          "pathTemplate": "/v8/management/credentials",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CRED-02-S3",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PATCH",
+          "pathTemplate": "/v8/management/credentials/status",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CRED-02-S4",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PATCH",
+          "pathTemplate": "/v8/management/credentials/fields",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CRED-02-S5",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "POST",
+          "pathTemplate": "/v8/management/credentials/refresh",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "CRED-02-S6",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/credentials",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "OAUTH-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "OAUTH-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/oauth/auth-url",
+          "effect": "flow-start",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "OAUTH-01-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/oauth/status",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "OAUTH-01-S3",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/oauth/callback",
+          "effect": "mutating",
+          "authClass": "oauth-state",
+          "probeEligible": false
+        },
+        {
+          "id": "OAUTH-01-S4",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "POST",
+          "pathTemplate": "/v8/management/oauth/callback",
+          "effect": "mutating",
+          "authClass": "oauth-state",
+          "probeEligible": false
+        },
+        {
+          "id": "OAUTH-01-S5",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "DELETE",
+          "pathTemplate": "/v8/management/oauth/session",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "MODEL-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "MODEL-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/credentials/models",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "MODEL-01-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/routing/model-definitions/:channel",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "USAGE-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "USAGE-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/config",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": true
+        },
+        {
+          "id": "USAGE-01-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "PATCH",
+          "pathTemplate": "/v8/management/config",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "USAGE-02",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "USAGE-02-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/observability/usage/queue",
+          "effect": "consuming",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "STAGE-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "STAGE-01-S1",
+          "transport": "fixture",
+          "ownerClass": "contract-fixture",
+          "method": null,
+          "pathTemplate": null,
+          "effect": "staging",
+          "authClass": "fixture-only",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "EXT-GUARD-01",
+      "kind": "guard",
+      "surfaces": [
+        {
+          "id": "EXT-GUARD-01-S1",
+          "transport": "fixture",
+          "ownerClass": "contract-fixture",
+          "method": null,
+          "pathTemplate": null,
+          "effect": "guard-only",
+          "authClass": "fixture-only",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "PLUGIN-CORE-01",
+      "kind": "function",
+      "surfaces": [
+        {
+          "id": "PLUGIN-CORE-01-S1",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/plugins",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S2",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "DELETE",
+          "pathTemplate": "/v8/management/plugins/:id",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S3",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/plugins/store",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S4",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "POST",
+          "pathTemplate": "/v8/management/plugins/store/:id/install",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S5",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "GET",
+          "pathTemplate": "/v8/management/plugins/:id/quota",
+          "effect": "read-only",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S6",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "POST",
+          "pathTemplate": "/v8/management/plugins/:id/quota",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        },
+        {
+          "id": "PLUGIN-CORE-01-S7",
+          "transport": "http",
+          "ownerClass": "cpa-core-management",
+          "method": "DELETE",
+          "pathTemplate": "/v8/management/plugins/:id/quota",
+          "effect": "mutating",
+          "authClass": "management",
+          "probeEligible": false
+        }
+      ]
+    },
+    {
+      "id": "EXT-ENABLE-01",
+      "kind": "function",
+      "surfaces": []
+    }
+  ],
+  "profiles": [
+    {
+      "id": "CPA8-MGMT-MIN-r1",
+      "revision": "r1",
+      "selected": true,
+      "requiredOperationRefs": [
+        "AUTH-01",
+        "AUTH-02",
+        "CFG-01",
+        "CFG-02",
+        "KEY-01",
+        "KEY-02",
+        "CRED-01",
+        "CRED-02",
+        "OAUTH-01",
+        "MODEL-01"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-USAGE-MIN-r1",
+      "revision": "r1",
+      "selected": true,
+      "requiredOperationRefs": [
+        "USAGE-01",
+        "USAGE-02"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-STAGE-r1",
+      "revision": "r1",
+      "selected": true,
+      "requiredOperationRefs": [
+        "STAGE-01"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-EXTERNAL-SAFETY-r1",
+      "revision": "r1",
+      "selected": true,
+      "requiredOperationRefs": [
+        "AUTH-01",
+        "CFG-01"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-EXTENSION-GUARD-r1",
+      "revision": "r1",
+      "selected": true,
+      "requiredOperationRefs": [
+        "EXT-GUARD-01"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-PLUGIN-CORE-r1",
+      "revision": "r1",
+      "selected": false,
+      "requiredOperationRefs": [
+        "PLUGIN-CORE-01"
+      ],
+      "optionalOperationRefs": []
+    },
+    {
+      "id": "CPA8-EXTENSION-ENABLE-r1",
+      "revision": "r1",
+      "selected": false,
+      "requiredOperationRefs": [
+        "EXT-ENABLE-01",
+        "EXT-GUARD-01"
+      ],
+      "optionalOperationRefs": []
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "CPA8-UPSTREAM-r1",
+      "revision": "r1",
+      "kind": "upstream-real",
+      "proofScope": "upstream-function",
+      "lifecycle": "declared",
+      "configProfileId": "isolated-management-r1",
+      "modeProfileId": "isolated-loopback-r1"
+    },
+    {
+      "id": "CPA8-STAGE-r1",
+      "revision": "r1",
+      "kind": "upstream-real",
+      "proofScope": "upstream-function",
+      "lifecycle": "declared",
+      "configProfileId": "synthetic-source-r1",
+      "modeProfileId": "isolated-staging-r1"
+    },
+    {
+      "id": "CPA8-HARNESS-r1",
+      "revision": "r1",
+      "kind": "local-stub",
+      "proofScope": "harness-behavior",
+      "lifecycle": "declared",
+      "configProfileId": "synthetic-http-r1",
+      "modeProfileId": "isolated-loopback-r1"
+    },
+    {
+      "id": "CPA8-GUARD-r1",
+      "revision": "r1",
+      "kind": "boundary-deny",
+      "proofScope": "boundary-guard",
+      "lifecycle": "declared",
+      "configProfileId": "synthetic-guard-r1",
+      "modeProfileId": "offline-r1"
+    }
+  ],
+  "cases": [
+    {
+      "id": "AQ01-AUTH-01",
+      "operationRef": "AUTH-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1",
+        "CPA8-EXTERNAL-SAFETY-r1"
+      ],
+      "surfaceRefs": [
+        "AUTH-01-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "AUTH-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-AUTH-02",
+      "operationRef": "AUTH-02",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "AUTH-02-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "AUTH-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-CFG-01",
+      "operationRef": "CFG-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1",
+        "CPA8-EXTERNAL-SAFETY-r1"
+      ],
+      "surfaceRefs": [
+        "CFG-01-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "CFG-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-CFG-02",
+      "operationRef": "CFG-02",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "CFG-02-S1",
+        "CFG-02-S2",
+        "CFG-02-S3"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "CFG-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-KEY-01",
+      "operationRef": "KEY-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "KEY-01-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "KEY-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-KEY-02",
+      "operationRef": "KEY-02",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "KEY-02-S1",
+        "KEY-02-S2",
+        "KEY-02-S3",
+        "KEY-02-S4"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "KEY-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-CRED-01",
+      "operationRef": "CRED-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "CRED-01-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "CRED-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-CRED-02",
+      "operationRef": "CRED-02",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "CRED-02-S1",
+        "CRED-02-S2",
+        "CRED-02-S3",
+        "CRED-02-S4",
+        "CRED-02-S5",
+        "CRED-02-S6"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "CRED-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-OAUTH-01",
+      "operationRef": "OAUTH-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "OAUTH-01-S1",
+        "OAUTH-01-S2",
+        "OAUTH-01-S3",
+        "OAUTH-01-S4",
+        "OAUTH-01-S5"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "OAUTH-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-MODEL-01",
+      "operationRef": "MODEL-01",
+      "profileRefs": [
+        "CPA8-MGMT-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "MODEL-01-S1",
+        "MODEL-01-S2"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "MODEL-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-USAGE-01",
+      "operationRef": "USAGE-01",
+      "profileRefs": [
+        "CPA8-USAGE-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "USAGE-01-S1",
+        "USAGE-01-S2"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "USAGE-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-USAGE-02",
+      "operationRef": "USAGE-02",
+      "profileRefs": [
+        "CPA8-USAGE-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "USAGE-02-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "USAGE-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-STAGE-01",
+      "operationRef": "STAGE-01",
+      "profileRefs": [
+        "CPA8-STAGE-r1"
+      ],
+      "surfaceRefs": [
+        "STAGE-01-S1"
+      ],
+      "fixtureRef": "CPA8-STAGE-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "STAGE-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-EXT-GUARD-01",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1",
+        "CPA8-EXTENSION-ENABLE-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-GUARD-r1",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "EXT-GUARD-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-PLUGIN-CORE-01",
+      "operationRef": "PLUGIN-CORE-01",
+      "profileRefs": [
+        "CPA8-PLUGIN-CORE-r1"
+      ],
+      "surfaceRefs": [
+        "PLUGIN-CORE-01-S1",
+        "PLUGIN-CORE-01-S2",
+        "PLUGIN-CORE-01-S3",
+        "PLUGIN-CORE-01-S4",
+        "PLUGIN-CORE-01-S5",
+        "PLUGIN-CORE-01-S6",
+        "PLUGIN-CORE-01-S7"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "PLUGIN-CORE-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-EXT-ENABLE-01",
+      "operationRef": "EXT-ENABLE-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-ENABLE-r1"
+      ],
+      "surfaceRefs": [],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "EXT-ENABLE-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    }
+  ]
+}
