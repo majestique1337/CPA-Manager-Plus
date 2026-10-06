@@ -50,6 +50,8 @@ const triggersFrontend = (filePath) =>
   filePath === 'eslint.config.js' ||
   filePath === 'bin/install-cpamp.sh' ||
   filePath === 'bin/ci/validate-cpa-v8-evidence.mjs' ||
+  filePath === 'bin/ci/run-cpa-v8-qualification.mjs' ||
+  filePath === 'bin/ci/prepare-cpa-v8-artifact.py' ||
   startsWithPath(filePath, 'bin/release');
 
 const triggersManagerServer = (filePath) =>

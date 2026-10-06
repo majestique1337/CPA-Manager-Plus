@@ -23,9 +23,13 @@ const noChecks = {
 };
 
 describe('PR check classifier', () => {
-  it('runs repo checks for each AQ-01 evidence path independently', () => {
+  it('runs repo checks for each AQ-01/02 evidence and runner path independently', () => {
     for (const filePath of [
       'bin/ci/validate-cpa-v8-evidence.mjs',
+      'bin/ci/run-cpa-v8-qualification.mjs',
+      'bin/ci/prepare-cpa-v8-artifact.py',
+      'tests/fixtures/cpa-v8-qualification/Dockerfile.runner',
+      'tests/cpaV8QualificationRunner.test.mjs',
       'tests/fixtures/cpa-v8-qualification/manifest.json',
       'tests/fixtures/cpa-v8-qualification/README.md',
       'tests/cpaV8EvidenceContract.test.mjs',
