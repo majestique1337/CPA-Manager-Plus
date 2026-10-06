@@ -290,6 +290,111 @@ export function createSeedManifest() {
   });
 }
 
+// r2 freezes leaf inputs before execution. The runner dispatches these IDs only;
+// no URL, executable, credential or payload is supplied by the manifest.
+const MANAGEMENT_GROUPS = [
+  ['AUTH-01', 'bearer'],
+  ['AUTH-01', 'header bearer-precedence'],
+  ['AUTH-01', 'missing wrong'],
+  ['AUTH-01', 'ban'],
+  [
+    'AUTH-01',
+    'client-as-management upstream-as-management management-as-client upstream-as-client',
+  ],
+  ['AUTH-01', 'no-secret env-secret'],
+  ['AUTH-02', 'client'],
+  ['AUTH-02', 'missing wrong provider-error'],
+  ['AUTH-02', 'empty absent null'],
+  ['AUTH-02', 'rotate remove'],
+  ['CFG-01', 'root subtree yaml'],
+  ['CFG-01', 'read-only'],
+  ['CFG-02', 'root-put'],
+  ['CFG-02', 'subtree-put map-patch list-patch'],
+  ['CFG-02', 'delete absent null empty false zero invalid-type'],
+  ['CFG-02', 'readonly invalid-path invalid-body'],
+  ['CFG-02', 'yaml-put response-loss'],
+  ['KEY-01', 'populated empty'],
+  ['KEY-02', 'put patch delete'],
+  ['KEY-02', 'invalid duplicate write-failure response-loss'],
+  ['CRED-01', 'empty populated'],
+  ['CRED-02', 'raw multipart invalid duplicate partial'],
+  ['CRED-02', 'delete missing unsafe'],
+  ['CRED-02', 'status fields invalid readonly conflict'],
+  ['CRED-02', 'missing invalid refresh-error real-refresh'],
+  ['OAUTH-01', 'start missing-provider unknown-provider'],
+  ['OAUTH-01', 'pending unknown auth'],
+  ['OAUTH-01', 'get-missing post-missing invalid unknown mismatch'],
+  ['OAUTH-01', 'error-callback'],
+  ['OAUTH-01', 'cancel auth replay missing'],
+  ['OAUTH-01', 'repeated race'],
+  ['OAUTH-01', 'natural-expiry'],
+  ['OAUTH-01', 'real-exchange'],
+  ['MODEL-01', 'registered missing unknown'],
+  ['MODEL-01', 'codex unknown'],
+  ['MODEL-01', 'model-reload'],
+];
+
+export function createManagementManifest() {
+  const m = createSeedManifest();
+  m.revision = 'r2';
+  m.planInput = {
+    planCommit: 'b654d625902c0e810f9bfc581aa17c35f4b0cff0',
+    gateBlobSha: 'd5367e63d4feda5854d0639746c18d6a78e0b274',
+    scopeRevision: 'r2',
+  };
+  // The prerequisite head is distinct from the implementation's v2 merge base.
+  m.cpampBaselineCommit = '32ba418c2a5f09aaaba0f887a8d429da91df2fbe';
+  const add = (op, surface) => {
+    const item = m.operations.find((o) => o.id === op);
+    item.surfaces.push({ id: op + '-S' + (item.surfaces.length + 1), ...surface });
+  };
+  for (const op of ['CFG-01', 'CFG-02']) {
+    add(op, management('GET', '/config/:path'));
+    add(op, management('GET', '/config.yaml'));
+  }
+  for (const method of ['PUT', 'PATCH', 'DELETE'])
+    add('CFG-02', management(method, '/config/:path', 'mutating'));
+  add('CFG-02', management('PUT', '/config.yaml', 'mutating'));
+  for (const id of ['CPA8-MANAGEMENT-r2', 'CPA8-OAUTH-EXPIRY-r2'])
+    m.fixtures.push({
+      id,
+      revision: 'r2',
+      kind: 'upstream-real',
+      proofScope: 'upstream-function',
+      lifecycle: 'declared',
+      configProfileId:
+        id === 'CPA8-MANAGEMENT-r2' ? 'management-per-case-r2' : 'codex-natural-expiry-r2',
+      modeProfileId: 'linux-amd64-network-none-r2',
+    });
+  m.cases = m.cases.filter((c) => !MANAGEMENT_GROUPS.some(([op]) => op === c.operationRef));
+  MANAGEMENT_GROUPS.forEach(([operationRef, variants], index) => {
+    for (const variant of variants.split(' ')) {
+      const id = `AQ02-M${String(index + 1).padStart(2, '0')}-${variant}`;
+      const long = index === 31;
+      const checks = long
+        ? ['PENDING', 'ERROR', 'EXPIRY', 'NO-CREDENTIAL']
+        : ['HTTP', 'STATE', 'CONTROL'];
+      m.cases.push({
+        id,
+        operationRef,
+        profileRefs: m.profiles
+          .filter((p) => p.requiredOperationRefs.includes(operationRef))
+          .map((p) => p.id),
+        surfaceRefs: m.operations.find((o) => o.id === operationRef).surfaces.map((s) => s.id),
+        fixtureRef: long ? 'CPA8-OAUTH-EXPIRY-r2' : 'CPA8-MANAGEMENT-r2',
+        proofScope: 'upstream-function',
+        expectations: checks.map((check, i) => ({
+          id: id + '-' + check,
+          mandatory: true,
+          checkCode: i === 0 ? 'BODY_SHAPE' : 'POSTCONDITION',
+        })),
+        budgetRef: long ? 'oauth-expiry-r2' : 'standard-r1',
+      });
+    }
+  });
+  return m;
+}
+
 const stamp = (stat) => [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeMs, stat.ctimeMs];
 const sameFile = (a, b) => equal(stamp(a), stamp(b));
 function boundedRead(filename, limit, code = 'INPUT_INVALID') {
@@ -358,9 +463,10 @@ function validateManifest(m) {
     'cases',
   ]);
   requireThat(
-    m.schemaVersion === 1 && m.contractId === CONTRACT && m.revision === 'r1',
+    m.schemaVersion === 1 && m.contractId === CONTRACT && ['r1', 'r2'].includes(m.revision),
     'SCHEMA_VERSION'
   );
+  const trustedManifest = m.revision === 'r2' ? createManagementManifest() : createSeedManifest();
   fields(m.planInput, Object.keys(PLAN_INPUT));
   fields(m.candidate, Object.keys(CANDIDATE));
   for (const key of ['operations', 'profiles', 'fixtures', 'cases']) list(m[key]);
@@ -423,11 +529,13 @@ function validateManifest(m) {
     'ID_OR_REF_INVALID'
   );
   requireThat(
-    [...fixtures.keys()].every((id) => FIXTURES.some((f) => f.id === id)),
+    [...fixtures.keys()].every((id) => trustedManifest.fixtures.some((f) => f.id === id)),
     'ID_OR_REF_INVALID'
   );
   requireThat(
-    operations.size === 16 && profiles.size === 7 && fixtures.size === FIXTURES.length,
+    operations.size === 16 &&
+      profiles.size === 7 &&
+      fixtures.size === trustedManifest.fixtures.length,
     'COVERAGE_INVALID'
   );
   for (const p of m.profiles) {
@@ -460,7 +568,13 @@ function validateManifest(m) {
         }),
       'COVERAGE_INVALID'
     );
-    requireThat(c.budgetRef === 'standard-r1', 'FIELD_REJECTED');
+    requireThat(
+      c.budgetRef ===
+        (m.revision === 'r2' && c.id === 'AQ02-M32-natural-expiry'
+          ? 'oauth-expiry-r2'
+          : 'standard-r1'),
+      'FIELD_REJECTED'
+    );
     requireThat(c.proofScope === fixtures.get(c.fixtureRef).proofScope, 'ARTIFACT_BINDING_INVALID');
     requireThat(op.surfaces.length === 0 || c.surfaceRefs.length > 0, 'COVERAGE_INVALID');
   }
@@ -478,7 +592,7 @@ function validateManifest(m) {
     }
   }
   for (const op of m.operations) {
-    const expected = OPERATIONS.find((item) => item.id === op.id);
+    const expected = trustedManifest.operations.find((item) => item.id === op.id);
     requireThat(
       op.kind === expected.kind && op.surfaces.length === expected.surfaces.length,
       'SURFACE_POLICY_INVALID'
@@ -492,8 +606,8 @@ function validateManifest(m) {
     }
   }
   requireThat(
-    sameFields(m.planInput, PLAN_INPUT) &&
-      m.cpampBaselineCommit === BASE &&
+    sameFields(m.planInput, trustedManifest.planInput) &&
+      m.cpampBaselineCommit === trustedManifest.cpampBaselineCommit &&
       sameFields(m.candidate, CANDIDATE),
     'ARTIFACT_BINDING_INVALID'
   );
@@ -501,10 +615,11 @@ function validateManifest(m) {
     requireThat(
       sameFields(
         f,
-        FIXTURES.find((item) => item.id === f.id)
+        trustedManifest.fixtures.find((item) => item.id === f.id)
       ),
       'ARTIFACT_BINDING_INVALID'
     );
+  if (m.revision === 'r2') requireThat(equal(m.cases, trustedManifest.cases), 'COVERAGE_INVALID');
   return { operations, profiles, fixtures, cases };
 }
 
@@ -534,7 +649,7 @@ function validateReport(r, m, manifestBytes, catalogue) {
     'evidence',
   ]);
   requireThat(
-    r.schemaVersion === 1 && r.contractId === CONTRACT && r.manifestRevision === 'r1',
+    r.schemaVersion === 1 && r.contractId === CONTRACT && r.manifestRevision === m.revision,
     'SCHEMA_VERSION'
   );
   fields(r.run, [
@@ -557,7 +672,7 @@ function validateReport(r, m, manifestBytes, catalogue) {
   ]);
   list(r.results);
   list(r.evidence);
-  list(r.run.fixtureInputRefs, 4);
+  list(r.run.fixtureInputRefs, m.fixtures.length);
   for (const f of r.run.fixtureInputRefs)
     fields(f, ['fixtureRef', 'revision', 'configProfileId', 'modeProfileId']);
   for (const result of r.results) {

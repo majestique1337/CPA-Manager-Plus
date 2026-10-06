@@ -14,7 +14,35 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { validateEvidence } from '../bin/ci/validate-cpa-v8-evidence.mjs';
+import {
+  createSeedManifest,
+  createManagementManifest,
+  validateEvidence,
+} from '../bin/ci/validate-cpa-v8-evidence.mjs';
+
+describe('AQ-02 r2 immutable scope and r1 compatibility', () => {
+  it('keeps the checked-in manifest canonical and equal to the frozen r2 catalogue', () => {
+    expect(readFileSync(seedFile)).toEqual(encode(createManagementManifest()));
+    manifest = createManagementManifest();
+    expect(check().validationStatus).toBe('manifest_valid');
+  });
+  it.each(['drop-case', 'optional', 'payload-id', 'long-budget', 'base', 'profile', 'surface'])(
+    'rejects r2 %s scope drift',
+    (kind) => {
+      manifest = createManagementManifest();
+      const c = manifest.cases.find((item) => item.id === 'AQ02-M01-bearer');
+      if (kind === 'drop-case') manifest.cases = manifest.cases.filter((item) => item !== c);
+      if (kind === 'optional') c.expectations[0].mandatory = false;
+      if (kind === 'payload-id') c.id = 'AQ02-M01-arbitrary';
+      if (kind === 'long-budget') c.budgetRef = 'oauth-expiry-r2';
+      if (kind === 'base')
+        manifest.cpampBaselineCommit = '5bb3a5b88e234a2e8315af694388e72bc0bfe804';
+      if (kind === 'profile') manifest.profiles[0].requiredOperationRefs.pop();
+      if (kind === 'surface') manifest.operations[0].surfaces[0].pathTemplate = '/arbitrary';
+      expect(check().validationStatus).toBe('invalid');
+    }
+  );
+});
 
 describe('AQ-01 observed tool boundaries', () => {
   it.each([{ nodeFlags: [] }, { nodeFlags: ['--preserve-symlinks-main'] }])(
@@ -130,7 +158,8 @@ beforeEach(() => {
   mkdirSync(evidenceRoot, { mode: 0o700 });
   manifestPath = path.join(root, 'manifest.json');
   reportPath = path.join(root, 'report.json');
-  manifest = JSON.parse(readFileSync(seedFile, 'utf8'));
+  // Preserve all historical r1 contract tests after the checked-in scope moves to r2.
+  manifest = createSeedManifest();
 });
 afterEach(() => {
   rmSync(root, { recursive: true, force: true });
