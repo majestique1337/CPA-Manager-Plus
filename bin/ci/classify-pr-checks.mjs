@@ -55,6 +55,7 @@ const triggersFrontend = (filePath) =>
   filePath === 'bin/ci/cpa-v8-external-fixtures.mjs' ||
   filePath === 'bin/ci/cpa-v8-usage-fixtures.mjs' ||
   filePath === 'bin/ci/cpa-v8-stage-fixtures.mjs' ||
+  filePath === 'bin/ci/cpa-v8-extension-fixtures.mjs' ||
   startsWithPath(filePath, 'bin/release');
 
 const triggersManagerServer = (filePath) =>

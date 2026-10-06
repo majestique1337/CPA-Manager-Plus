@@ -19,12 +19,13 @@ import {
   createManagementManifest,
   createExternalManifest,
   createUsageStageManifest,
+  createExtensionManifest,
   validateEvidence,
 } from '../bin/ci/validate-cpa-v8-evidence.mjs';
 
 describe('AQ-02 r2 immutable scope and r1 compatibility', () => {
-  it('keeps the checked-in r4 manifest canonical and retains the frozen r2 catalogue', () => {
-    expect(readFileSync(seedFile)).toEqual(encode(createUsageStageManifest()));
+  it('keeps the checked-in r5 manifest canonical and retains the frozen r2 catalogue', () => {
+    expect(readFileSync(seedFile)).toEqual(encode(createExtensionManifest()));
     manifest = createManagementManifest();
     expect(check().validationStatus).toBe('manifest_valid');
   });
@@ -525,7 +526,7 @@ describe('V-AQ01-01 through 07: canonical input and references', () => {
       m.schemaVersion = 2;
     },
     (m) => {
-      m.revision = 'r5';
+      m.revision = 'r99';
     },
     (m) => {
       m.contractId = 'other';

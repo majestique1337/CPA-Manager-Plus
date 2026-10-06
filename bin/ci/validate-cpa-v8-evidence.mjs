@@ -591,6 +591,77 @@ export function createUsageStageManifest() {
   return m;
 }
 
+// Fixed inert guard recipes. These paths never become upstream surfaces.
+export const EXTENSION_GROUPS = [
+  ['protected'],
+  ['public'],
+  ['unknown', 'absent'],
+  ['menu', 'header', 'list', 'hash'],
+  ['core', 'custom', 'unknown-v0'],
+  ['duplicate', 'same-plugin', 'core-collision'],
+  ['plugin', 'resource'],
+  ['wildcard', 'prefix', 'host'],
+  ['POST', 'HEAD', 'OPTIONS', 'override'],
+  ['dot', 'dot-encoded', 'slash-encoded', 'double-encoded', 'encoded-letter'],
+  ['backslash', 'duplicate-slash', 'trailing-slash'],
+  ['absolute', 'userinfo', 'fragment', 'query', 'control'],
+  ['missing', 'unknown', 'capability', 'public-mutation'],
+  ['disabled', 'uninstalled', 'revoked'],
+  ['manifest', 'source', 'version'],
+  ['connection', 'credential', 'profile'],
+  ['queued', 'late', 'queued-aba', 'late-aba'],
+  ['protected-headers'],
+  ['public-headers'],
+  ['301', '302', '303', '307', '308', 'cookie', 'location'],
+  ['html', 'javascript', 'mime', 'unsafe-header'],
+  ['json', 'text', 'body-limit', 'header-limit', 'status', 'shape', 'invalid-json'],
+  ['exception', 'stale-grant', 'policy', 'partial-registry'],
+  ['native', 'browser'],
+];
+
+export function createExtensionManifest() {
+  const m = createUsageStageManifest();
+  m.revision = m.planInput.scopeRevision = 'r5';
+  m.cpampBaselineCommit = 'aacf002b9b80bad3fbebb84f5478ca89cd0ff4ef';
+  m.cases = createSeedManifest().cases.filter((c) => c.operationRef !== 'EXT-GUARD-01');
+  for (const [kind, proofScope] of [
+    ['boundary-deny', 'boundary-guard'],
+    ['local-stub', 'harness-behavior'],
+  ])
+    m.fixtures.push({
+      id: `CPA8-EXTENSION-${kind}-r5`,
+      revision: 'r5',
+      kind,
+      proofScope,
+      lifecycle: 'declared',
+      configProfileId: 'inert-extension-r5',
+      modeProfileId: 'offline-fixture-r5',
+    });
+  EXTENSION_GROUPS.forEach((variants, index) =>
+    variants.forEach((variant) => {
+      const id = `AQ05-G${String(index + 1).padStart(2, '0')}-${variant}`;
+      const proofScope = index >= 19 && index <= 21 ? 'harness-behavior' : 'boundary-guard';
+      m.cases.push({
+        id,
+        operationRef: 'EXT-GUARD-01',
+        profileRefs: ['CPA8-EXTENSION-GUARD-r1'],
+        surfaceRefs: ['EXT-GUARD-01-S1'],
+        fixtureRef: m.fixtures.find(
+          (f) => f.id.startsWith('CPA8-EXTENSION-') && f.proofScope === proofScope
+        ).id,
+        proofScope,
+        expectations: ['DECISION', 'DISPATCH', 'DELIVERY'].map((suffix) => ({
+          id: `${id}-${suffix}`,
+          mandatory: true,
+          checkCode: 'POSTCONDITION',
+        })),
+        budgetRef: 'standard-r1',
+      });
+    })
+  );
+  return m;
+}
+
 const stamp = (stat) => [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeMs, stat.ctimeMs];
 const sameFile = (a, b) => equal(stamp(a), stamp(b));
 function boundedRead(filename, limit, code = 'INPUT_INVALID') {
@@ -661,17 +732,19 @@ function validateManifest(m) {
   requireThat(
     m.schemaVersion === 1 &&
       m.contractId === CONTRACT &&
-      ['r1', 'r2', 'r3', 'r4'].includes(m.revision),
+      ['r1', 'r2', 'r3', 'r4', 'r5'].includes(m.revision),
     'SCHEMA_VERSION'
   );
   const trustedManifest =
-    m.revision === 'r4'
-      ? createUsageStageManifest()
-      : m.revision === 'r3'
-        ? createExternalManifest()
-        : m.revision === 'r2'
-          ? createManagementManifest()
-          : createSeedManifest();
+    m.revision === 'r5'
+      ? createExtensionManifest()
+      : m.revision === 'r4'
+        ? createUsageStageManifest()
+        : m.revision === 'r3'
+          ? createExternalManifest()
+          : m.revision === 'r2'
+            ? createManagementManifest()
+            : createSeedManifest();
   fields(m.planInput, Object.keys(PLAN_INPUT));
   fields(m.candidate, Object.keys(CANDIDATE));
   for (const key of ['operations', 'profiles', 'fixtures', 'cases']) list(m[key]);

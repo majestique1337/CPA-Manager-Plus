@@ -1,8 +1,148 @@
 # CPA v8 qualification evidence
 
+## AQ-05 r5 inert extension guard fixtures
+
+The current manifest has **94 declarations**: **79 selected leaves in 24 guard
+groups**, plus 15 unexecuted function declarations. Five mandatory profiles stay
+selected and the two optional plugin profiles stay off. Schema 1 and profile
+composition r1 remain unchanged; r1-r4 factories and original reports remain the
+coverage sources for those revisions. The r5 base is AQ-04 merge
+`aacf002b9b80bad3fbebb84f5478ca89cd0ff4ef`.
+
+`cpa-v8-extension-fixtures.mjs` exports a fixed evaluator and a foundation report
+builder. It has no executable CLI, network client, CPA run or plugin loader.
+The protected `GET /v0/management/cpamp-fixture/read` and public
+`GET /v0/resource/plugins/cpamp-fixture/status` are inert fixture data only. The
+EXT-GUARD manifest surface remains `transport=fixture`, method/path null and
+`probeEligible=false`; actual EXT-ENABLE surfaces remain empty.
+
+The evaluator distinguishes exact core ownership, declared plugin ownership,
+unknown routes and conflicts. Duplicate keys, including same-plugin duplicates,
+are rejected independently of declaration order. Fixture trust is explicit; a
+reported menu, header, list or digest cannot grant it. Paths reject encoded,
+ambiguous and noncanonical forms; query and method overrides cannot widen a
+route. A one-use dispatch ticket checks current identity and monotonic epoch at
+send and delivery. Revocation/ABA blocks new sends and late delivery while
+retaining the count of effects already sent.
+
+Protected headers contain only an adapter-owned synthetic CPA key; public
+headers contain no credentials. Inbound headers are rebuilt, with a 32 KiB
+UTF-8 byte limit. Responses accept only fixed inert JSON or plain text, nosniff,
+32 KiB headers and one MiB bodies. Redirects, cookies, active content, ambiguous
+MIME and unknown response headers reject the whole response. No actual browser
+origin/DOM/storage/network isolation is established. Native CPA plugins remain
+fully trusted code that can access runtime state and key material.
+
+`emitExtensionEvidence(ownedParent, implementationCommit)` creates a fresh owned
+child directory and never overwrites an existing report. It writes the original
+canonical manifest, per-leaf safe traces and a `foundation-fixture` report. The
+candidate remains declared: provenance `not-verified`, both observed hashes
+null. Guard assertions may support guard behavior only; response harness leaves
+remain unknown. Directory drift or failed private cleanup prevents a completed
+run. The supplied execution commit must be verified independently against the
+actual implementation and test source; it is not an attestation service.
+
+Run the six qualification/classifier test files and `npm run test:repo`. These
+checks execute every fixed guard leaf and transport/process tripwires; they do
+not start CPA or qualify optional plugins. The existing runner's default
+manifest validation accepts r5, but it gains no r5 upstream case set.
+
+### Independent exit index — pending
+
+```yaml
+decision: pending
+qualification: not accepted
+profileComposition: r1
+toolAcceptance: pending
+observedUpstream: see-original-scope-reports
+acceptedPre4A: pending
+acceptedProductionConsumer: pending
+publishedSupported: not established
+independentReviewer: pending
+```
+
+This is a manual index prepared by the implementer. A reviewer must expand each
+requested profile to **every mandatory leaf and expectation in its original
+manifest**, then accept or reject applicable evidence and limitations. The rows
+below locate original material; they do not assert complete or independently
+accepted coverage. CI success, merged PRs and this emitter cannot decide Go.
+
+| Scope             | Implementation / original material                                                                               | Current acceptance state                                                                                                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| r1 foundation     | #912, `32ba418c2a5f09aaaba0f887a8d429da91df2fbe`; `createSeedManifest()`                                         | Tool/independent acceptance reference missing                                                                                                                       |
+| r2 normal         | #915, implementation `27f4bf80dc7cbbca90c07cc2d3853be7c5ee9902`; local `normal-04/output/run-NDrZLb` (92 leaves) | Report records base `5bb3a5b88e234a2e8315af694388e72bc0bfe804` as runnerCommit; all three source hashes match implementation. Independent reconciliation pending    |
+| r2 natural expiry | local `expiry-01/output/run-TNSLLJ` (one leaf)                                                                   | Same recorded base; runner/validator hashes differ from final AQ-02 implementation. Affected evidence review or rerun remains pending; original report is preserved |
+| r3 External       | #917, `22eaaf12db07571a6664437a51282bcc54f73456`; local `run-02/output/run-i0iIO6` (50 leaves)                   | Exact committed run; independent acceptance and requested real-target coverage pending                                                                              |
+| r4 Usage/Stage    | #920, `7d8c98cb93a4ca9d405f2f91504348d439655f59`; local `run-06/output/run-ZNLRZB` (40 leaves)                   | Exact committed run; limitations and independent acceptance pending                                                                                                 |
+| r5 guard          | This scope's emitted foundation report, exact implementation/test head and all 79 leaf traces                    | Independent tool/guard acceptance pending; no upstream execution                                                                                                    |
+
+Original report / manifest SHA256 bindings (local artifact locators above; traces
+are resolved through each original report's evidenceRefs and recorded hashes):
+
+```text
+r2 normal report   d4e46e961db257770b0d705b5f1d3fa200edf930f2363186a75e04330b07a702
+r2 expiry report   7e0255abad94f3ca83a9619cb69866fbb01ba96de3fc0ddc19c3ede349d14202
+r2 manifest        758fafa41bbbf6ce58961c0a3ac3beedab2af29b18631bef3ffb4064dd3955f2
+r3 report          2d8872beae7ed07c75d2f911daff11a7e9d8f5e8a001b2159536b9b2bdfb2f2f
+r3 manifest        75f79bc124a5a712ac74f162b0ab8d434438863b295a79de60e92a8d7c5523ea
+r4 report          6add816401dad04a7e29285eece43e30abcef6625313a8e492ae24b4ef079a7c
+r4 manifest        3c21eb7db0d45638b9be81891277329b0c04ea941588dc90213d6d864f34896f
+```
+
+All original r2-r4 reports above observe archive
+`50ecffb47fdd81c8c5a9825a73a7a905ab66342337e274f39c4276b92d3533f3`
+and binary `b682e9e42586263f476888361514f68f89ff4ebf89a5dadba394b850b797ce41`.
+Those observations belong to their original runs and are never copied into r5.
+
+For each required leaf, copy and complete this row without changing the source
+report or marking an empty field accepted:
+
+```yaml
+profileRef: pending
+operationRef: pending
+originalManifestRevision: pending
+originalManifestSha256: pending
+runId: pending
+caseRef: pending
+expectationRef: pending
+fixtureRef: pending
+configProfileId: pending
+modeProfileId: pending
+artifactProvenanceAndObservedHashes: pending
+implementationCommit: pending
+testCommitAndSourceHashes: pending
+safeEvidencePathAndSha256: pending
+sliceIndependentAcceptanceRef: pending
+statusAndAcceptedLimitation: pending
+invalidatedBy: manifest-or-head-or-artifact-or-config-or-mode-or-profile-change
+remainingConsumerOwner: pending
+```
+
+| Exit check        | Evidence and remaining closure condition                                                                                                                                                            | Decision |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| X01 Plan/heads    | Gate commit/blob in manifest; exact implementation/test heads above; AQ-02 metadata/source reconciliation and independent baseline references required                                              | pending  |
+| X02 Profiles      | 16 operations, seven profiles, five mandatory/two optional off; requested scope must remain explicit                                                                                                | pending  |
+| X03 Completeness  | Expand original catalogues by mandatory leaf/expectation; neither seed counts nor selected-pass totals prove coverage                                                                               | pending  |
+| X04 Tool/artifact | Independently accept validator/runner/source binding and original observed archive/binary provenance                                                                                                | pending  |
+| X05 Management    | Original readback/persisted/effective controls; real provider OAuth exchange and refresh remain missing                                                                                             | pending  |
+| X06 External      | Original target/transport/semantic/freshness facts; real target/proxy applicability remains unaccepted                                                                                              | pending  |
+| X07 Usage         | Limited receipts, loss, disabling, retention and competition; maximum natural window, observed overflow and exact enqueue witness remain missing                                                    | pending  |
+| X08 Stage         | Synthetic snapshots, startup writes, commits and conditional restore; no real legacy upgrade or product cutover acceptance                                                                          | pending  |
+| X09 Extension     | Accept all applicable r5 guard/harness facts independently; optional actual enable remains off and needs separate provenance/route/content/native-trust evidence                                    | pending  |
+| X10 Integrity     | Check original hashes, limits, cleanup and actual CI per implementation head; partial/failed/unknown runs cannot fill requirements                                                                  | pending  |
+| X11 ADR           | ADR-0001 authority and ADR-0004 Full Web Public-only/Lite separation still apply; fixture-only code adds no durable authority change. Independent reconciliation required                           | pending  |
+| X12 Exit/owners   | Independent reviewer records accepted/rejected/pending scope and limitations. Accepted pre-4A permits shaping 4A-01 only; product consumers, UI, optional enable and release retain their own gates | pending  |
+
+No new ADR is needed for this inert fixture implementation. ADR-0004's general
+CPA Management boundary covers v8 as well as its v0 examples; a custom declared
+v0 fixture is no permission for Full Web to connect directly. Real transport,
+browser content/native trust and migration/recovery consumers remain with their
+respective Foundation, Lite/Plugin and lifecycle owners. #870 and the design/UI
+stop remain in force. **Pre-4A exit remains pending/blocked.**
+
 ## AQ-04 r4 Usage and Stage fixtures
 
-The current manifest has **55 declarations**. `usage-stage-r4` selects **40 leaves
+The historical r4 manifest has **55 declarations**. `usage-stage-r4` selects **40 leaves
 in 34 groups** (18 Usage, 16 Stage). Thirteen other operations plus the maximum
 natural retention and observed subscriber overflow leaves remain pending. The
 schema, 16 operations, seven profiles and r1 profile composition are unchanged.

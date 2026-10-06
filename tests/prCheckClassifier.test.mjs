@@ -33,6 +33,8 @@ describe('PR check classifier', () => {
       'bin/ci/cpa-v8-usage-fixtures.mjs',
       'bin/ci/cpa-v8-stage-fixtures.mjs',
       'tests/cpaV8UsageStage.test.mjs',
+      'bin/ci/cpa-v8-extension-fixtures.mjs',
+      'tests/cpaV8ExtensionGuard.test.mjs',
       'tests/fixtures/cpa-v8-qualification/Dockerfile.runner',
       'tests/cpaV8QualificationRunner.test.mjs',
       'tests/fixtures/cpa-v8-qualification/manifest.json',
