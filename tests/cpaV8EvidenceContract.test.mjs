@@ -18,12 +18,13 @@ import {
   createSeedManifest,
   createManagementManifest,
   createExternalManifest,
+  createUsageStageManifest,
   validateEvidence,
 } from '../bin/ci/validate-cpa-v8-evidence.mjs';
 
 describe('AQ-02 r2 immutable scope and r1 compatibility', () => {
-  it('keeps the checked-in r3 manifest canonical and retains the frozen r2 catalogue', () => {
-    expect(readFileSync(seedFile)).toEqual(encode(createExternalManifest()));
+  it('keeps the checked-in r4 manifest canonical and retains the frozen r2 catalogue', () => {
+    expect(readFileSync(seedFile)).toEqual(encode(createUsageStageManifest()));
     manifest = createManagementManifest();
     expect(check().validationStatus).toBe('manifest_valid');
   });

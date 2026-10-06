@@ -489,6 +489,108 @@ export function createExternalManifest() {
   return m;
 }
 
+// AQ-04 has scope-local leaves. r1-r3 remain immutable evidence inputs.
+export const USAGE_STAGE_GROUPS = [
+  ['U01', 'USAGE-01', 'upstream-function', 'config'],
+  ['U02', 'USAGE-01', 'upstream-function', 'enable'],
+  ['U02', 'USAGE-02', 'upstream-function', 'receipt'],
+  ['U03', 'USAGE-02', 'upstream-function', 'batch'],
+  ['U04', 'USAGE-01', 'upstream-function', 'disable'],
+  ['U04', 'USAGE-02', 'upstream-function', 'backlog'],
+  ['U05', 'USAGE-01', 'upstream-function', 'availability'],
+  ['U05', 'USAGE-02', 'upstream-function', 'clear'],
+  ['U06', 'USAGE-02', 'upstream-function', 'five-seconds'],
+  ['U07', 'USAGE-02', 'upstream-function', 'sixty-seconds'],
+  ['U08', 'USAGE-01', 'upstream-function', 'bounds'],
+  ['U09', 'USAGE-02', 'upstream-function', 'pop'],
+  ['U09', 'USAGE-02', 'harness-behavior', 'relay'],
+  ['U10', 'USAGE-02', 'harness-behavior', 'unknown-cutpoint'],
+  ['U11', 'USAGE-02', 'harness-behavior', 'projection'],
+  ['U12', 'USAGE-02', 'upstream-function', 'graceful'],
+  ['U13', 'USAGE-02', 'upstream-function', 'forced'],
+  ['U14', 'USAGE-02', 'upstream-function', 'competition'],
+  ['U15', 'USAGE-02', 'upstream-function', 'subscribe'],
+  ['U16', 'USAGE-02', 'upstream-function', 'fanout'],
+  ['U17', 'USAGE-02', 'upstream-function', 'pressure'],
+  ['U17', 'USAGE-02', 'harness-behavior', 'overflow-unknown'],
+  ['U18', 'USAGE-02', 'harness-behavior', 'binding'],
+  ['S01', 'STAGE-01', 'harness-behavior', 'snapshot'],
+  ['S02', 'STAGE-01', 'upstream-function', 'legacy'],
+  ['S03', 'STAGE-01', 'upstream-function', 'plaintext'],
+  ['S04', 'STAGE-01', 'upstream-function', 'mixed'],
+  ['S05', 'STAGE-01', 'upstream-function', 'v8'],
+  ['S06', 'STAGE-01', 'upstream-function', 'paths'],
+  ['S07', 'STAGE-01', 'upstream-function', 'invalid'],
+  ['S08', 'STAGE-01', 'upstream-function', 'readonly'],
+  ['S09', 'STAGE-01', 'upstream-function', 'commit'],
+  ['S10', 'STAGE-01', 'upstream-function', 'rejected'],
+  ['S11', 'STAGE-01', 'upstream-function', 'reconcile'],
+  ['S11', 'STAGE-01', 'harness-behavior', 'lost-reply'],
+  ['S12', 'STAGE-01', 'harness-behavior', 'precommit'],
+  ['S13', 'STAGE-01', 'harness-behavior', 'restore'],
+  ['S14', 'STAGE-01', 'boundary-guard', 'fence'],
+  ['S15', 'STAGE-01', 'boundary-guard', 'tamper'],
+  ['S16', 'STAGE-01', 'harness-behavior', 'crash'],
+];
+
+export function createUsageStageManifest() {
+  const m = createExternalManifest();
+  m.revision = m.planInput.scopeRevision = 'r4';
+  m.cpampBaselineCommit = '4343c7aa597fa133aa112d45dcec5ca07e8dd33a';
+  const ops = ['USAGE-01', 'USAGE-02', 'STAGE-01'];
+  m.cases = createSeedManifest().cases.filter((c) => !ops.includes(c.operationRef));
+  for (const [kind, proofScope] of [
+    ['upstream-real', 'upstream-function'],
+    ['local-stub', 'harness-behavior'],
+    ['boundary-deny', 'boundary-guard'],
+  ])
+    m.fixtures.push({
+      id: `CPA8-USAGE-STAGE-${kind}-r4`,
+      revision: 'r4',
+      kind,
+      proofScope,
+      lifecycle: 'declared',
+      configProfileId: 'usage-stage-owned-r4',
+      modeProfileId: 'linux-amd64-network-none-r4',
+    });
+  for (const id of ops)
+    m.operations
+      .find((o) => o.id === id)
+      .surfaces.push({
+        id: `${id}-FIXTURE-r4`,
+        ...fixtureSurface('read-only'),
+      });
+  const leaves = [
+    ...USAGE_STAGE_GROUPS,
+    ['P01', 'USAGE-02', 'upstream-function', 'max-natural-retention'],
+    ['P02', 'USAGE-02', 'upstream-function', 'observed-subscriber-overflow'],
+  ];
+  for (const [group, operationRef, proofScope, variant] of leaves) {
+    const id = `AQ04-${group}-${variant}`;
+    m.cases.push({
+      id,
+      operationRef,
+      profileRefs: m.profiles
+        .filter((p) => p.requiredOperationRefs.includes(operationRef))
+        .map((p) => p.id),
+      surfaceRefs: [
+        proofScope === 'upstream-function' ? `${operationRef}-S1` : `${operationRef}-FIXTURE-r4`,
+      ],
+      fixtureRef: m.fixtures.find(
+        (f) => f.id.startsWith('CPA8-USAGE-STAGE-') && f.proofScope === proofScope
+      ).id,
+      proofScope,
+      expectations: ['OBSERVATION', 'STATE', 'CONTROL'].map((suffix) => ({
+        id: `${id}-${suffix}`,
+        mandatory: true,
+        checkCode: 'POSTCONDITION',
+      })),
+      budgetRef: 'standard-r1',
+    });
+  }
+  return m;
+}
+
 const stamp = (stat) => [stat.dev, stat.ino, stat.mode, stat.size, stat.mtimeMs, stat.ctimeMs];
 const sameFile = (a, b) => equal(stamp(a), stamp(b));
 function boundedRead(filename, limit, code = 'INPUT_INVALID') {
@@ -557,15 +659,19 @@ function validateManifest(m) {
     'cases',
   ]);
   requireThat(
-    m.schemaVersion === 1 && m.contractId === CONTRACT && ['r1', 'r2', 'r3'].includes(m.revision),
+    m.schemaVersion === 1 &&
+      m.contractId === CONTRACT &&
+      ['r1', 'r2', 'r3', 'r4'].includes(m.revision),
     'SCHEMA_VERSION'
   );
   const trustedManifest =
-    m.revision === 'r3'
-      ? createExternalManifest()
-      : m.revision === 'r2'
-        ? createManagementManifest()
-        : createSeedManifest();
+    m.revision === 'r4'
+      ? createUsageStageManifest()
+      : m.revision === 'r3'
+        ? createExternalManifest()
+        : m.revision === 'r2'
+          ? createManagementManifest()
+          : createSeedManifest();
   fields(m.planInput, Object.keys(PLAN_INPUT));
   fields(m.candidate, Object.keys(CANDIDATE));
   for (const key of ['operations', 'profiles', 'fixtures', 'cases']) list(m[key]);
