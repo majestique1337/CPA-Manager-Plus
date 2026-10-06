@@ -23,6 +23,18 @@ const noChecks = {
 };
 
 describe('PR check classifier', () => {
+  it('runs repo checks for each AQ-01 evidence path independently', () => {
+    for (const filePath of [
+      'bin/ci/validate-cpa-v8-evidence.mjs',
+      'tests/fixtures/cpa-v8-qualification/manifest.json',
+      'tests/fixtures/cpa-v8-qualification/README.md',
+      'tests/cpaV8EvidenceContract.test.mjs',
+    ]) {
+      expect(classifyChangedFiles([filePath])).toEqual({ ...noChecks, frontend: true });
+    }
+    expect(classifyChangedFiles(['bin/ci/validate-cpa-v8-evidence-other.mjs'])).toEqual(noChecks);
+  });
+
   it('fails closed when no changed files are available', () => {
     expect(classifyChangedFiles([])).toEqual({
       frontend: true,

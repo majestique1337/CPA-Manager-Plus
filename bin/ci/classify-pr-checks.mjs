@@ -49,6 +49,7 @@ const triggersFrontend = (filePath) =>
   filePath === '.github/dependabot.yml' ||
   filePath === 'eslint.config.js' ||
   filePath === 'bin/install-cpamp.sh' ||
+  filePath === 'bin/ci/validate-cpa-v8-evidence.mjs' ||
   startsWithPath(filePath, 'bin/release');
 
 const triggersManagerServer = (filePath) =>
