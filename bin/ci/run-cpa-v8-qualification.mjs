@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 import { createHash, randomBytes } from 'node:crypto';
 import {
-  constants,
-  openSync,
-  closeSync,
-  readSync,
-  fstatSync,
   lstatSync,
   realpathSync,
   readFileSync,
@@ -25,9 +20,15 @@ import { performance } from 'node:perf_hooks';
 
 const MiB = 1024 * 1024;
 const HERE = path.dirname(realpathSync(fileURLToPath(import.meta.url)));
-const { createManagementManifest, createExternalManifest, validateEvidence } = await import(
-  pathToFileURL(path.join(HERE, 'validate-cpa-v8-evidence.mjs')).href
+const { readOwnedFile } = await import(
+  pathToFileURL(path.join(HERE, 'cpa-v8-stage-fixtures.mjs')).href
 );
+const {
+  createManagementManifest,
+  createExternalManifest,
+  createUsageStageManifest,
+  validateEvidence,
+} = await import(pathToFileURL(path.join(HERE, 'validate-cpa-v8-evidence.mjs')).href);
 const MANAGEMENT = '/v8/management';
 const MODEL = 'aq02-model';
 const NAME = 'aq02-synthetic.json';
@@ -53,41 +54,8 @@ const insist = (ok, code = 'SETUP_FAILED') => {
   if (!ok) throw new Fault(code);
 };
 const safeCode = (error) => (typedCodes.has(error?.code) ? error.code : 'SETUP_FAILED');
-const stamp = (s) => [s.dev, s.ino, s.size, s.mode, s.mtimeMs, s.ctimeMs, s.nlink];
 
-export function readOwnedFile(
-  filename,
-  limit = MiB,
-  owner = typeof process.getuid === 'function' ? process.getuid() : null
-) {
-  insist(path.isAbsolute(filename) && realpathSync(filename) === filename);
-  const before = lstatSync(filename);
-  insist(
-    before.isFile() &&
-      before.nlink === 1 &&
-      !(before.mode & 0o022) &&
-      (owner === null || before.uid === owner)
-  );
-  let fd;
-  try {
-    fd = openSync(filename, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
-    insist(same(stamp(before), stamp(fstatSync(fd))));
-    const bytes = Buffer.alloc(limit + 1);
-    let count = 0;
-    while (count < bytes.length) {
-      const n = readSync(fd, bytes, count, Math.min(65536, bytes.length - count), null);
-      if (!n) break;
-      count += n;
-    }
-    insist(count <= limit, 'INPUT_LIMIT');
-    insist(
-      same(stamp(before), stamp(fstatSync(fd))) && same(stamp(before), stamp(lstatSync(filename)))
-    );
-    return bytes.subarray(0, count);
-  } finally {
-    if (fd !== undefined) closeSync(fd);
-  }
-}
+export { readOwnedFile };
 
 function ownedDirectory(directory) {
   insist(path.isAbsolute(directory) && realpathSync(directory) === directory);
@@ -276,6 +244,9 @@ export function spawnOwned(
   return {
     child,
     closed,
+    get stopped() {
+      return stopped;
+    },
     get fault() {
       return fault;
     },
@@ -283,9 +254,9 @@ export function spawnOwned(
       return !exited && !fault;
     },
     output: () => Buffer.concat(chunks),
-    async stop() {
+    async stop(force = false) {
       if (stopped) return;
-      kill('SIGTERM');
+      kill(force ? 'SIGKILL' : 'SIGTERM');
       const graceful = performance.now() + 5000;
       while ((!exited || groupAlive()) && performance.now() < graceful) await delay(25);
       if (!exited || groupAlive()) {
@@ -557,7 +528,7 @@ function runtimeIsolation() {
 
 export async function openFixture(work, spec, binary, binaryHash, signal) {
   const root = mkdtempSync(path.join(work, 'case-'));
-  const home = path.join(root, 'home'),
+  let home = path.join(root, 'home'),
     authDir = path.join(root, 'auth');
   mkdirSync(home, { mode: 0o700 });
   mkdirSync(authDir, { mode: 0o700 });
@@ -607,7 +578,7 @@ export async function openFixture(work, spec, binary, binaryHash, signal) {
       if (variant === 'absent') delete config.access['api-keys'];
       else config.access['api-keys'] = variant === 'null' ? null : [];
     }
-    const filename = path.join(root, 'config.yaml');
+    let filename = path.join(root, 'config.yaml');
     save(filename, config); // JSON is valid YAML.
     insist(hash(readOwnedFile(binary, 128 * MiB)) === binaryHash);
     const env = childEnvironment(home, envSecret ? managementKey : undefined);
@@ -635,56 +606,97 @@ export async function openFixture(work, spec, binary, binaryHash, signal) {
         {},
         options
       );
-    const startup = new AbortController();
-    const startupTimer = setTimeout(() => startup.abort(), 30000);
-    const startupSignal = signal ? AbortSignal.any([signal, startup.signal]) : startup.signal;
-    try {
-      await waitForListener(port, child, startupSignal);
-      let r;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        try {
-          r = await mgmt('GET', '/config', undefined, undefined, undefined, {
-            signal: startupSignal,
-          });
-          break;
-        } catch (error) {
-          if (attempt !== 0 || error.code !== 'TARGET_UNREACHABLE') throw error;
-          await delay(100, startupSignal);
+    const ready = async () => {
+      const startup = new AbortController();
+      const startupTimer = setTimeout(() => startup.abort(), 30000);
+      const startupSignal = signal ? AbortSignal.any([signal, startup.signal]) : startup.signal;
+      try {
+        await waitForListener(port, child, startupSignal);
+        let r;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            r = await mgmt('GET', '/config', undefined, undefined, undefined, {
+              signal: startupSignal,
+            });
+            break;
+          } catch (error) {
+            if (attempt !== 0 || error.code !== 'TARGET_UNREACHABLE') throw error;
+            await delay(100, startupSignal);
+          }
         }
+        if (noSecret) {
+          insist(r.status === 404);
+          const count = stub.requests;
+          insist(
+            (await data(clientKey, MODEL, { signal: startupSignal })).json?.choices?.[0]?.message
+              ?.content === 'AQ02_OK' && stub.requests === count + 1
+          );
+        } else
+          // A reachable service with the wrong identity is never adopted as ours.
+          insist(
+            r.status === 200 &&
+              r.json?.['config-version'] === 8 &&
+              r.json?.server?.port === port &&
+              r.json?.oauth?.['auth-dir'] === authDir &&
+              same(r.json?.access?.['api-keys'], config.access['api-keys'])
+          );
+      } catch (error) {
+        if (startup.signal.aborted && !signal?.aborted) throw new Fault('TIMEOUT');
+        throw error;
+      } finally {
+        clearTimeout(startupTimer);
       }
-      if (noSecret) {
-        insist(r.status === 404);
-        const count = stub.requests;
-        insist(
-          (await data(clientKey, MODEL, { signal: startupSignal })).json?.choices?.[0]?.message
-            ?.content === 'AQ02_OK' && stub.requests === count + 1
-        );
-      } else
-        // A reachable service with the wrong identity is never adopted as ours.
-        insist(
-          r.status === 200 &&
-            r.json?.['config-version'] === 8 &&
-            r.json?.server?.port === port &&
-            r.json?.oauth?.['auth-dir'] === authDir &&
-            same(r.json?.access?.['api-keys'], config.access['api-keys'])
-        );
-    } catch (error) {
-      if (startup.signal.aborted && !signal?.aborted) throw new Fault('TIMEOUT');
-      throw error;
-    } finally {
-      clearTimeout(startupTimer);
-    }
+    };
+    await ready();
     return {
       root,
-      home,
-      authDir,
-      filename,
+      get home() {
+        return home;
+      },
+      get authDir() {
+        return authDir;
+      },
+      get filename() {
+        return filename;
+      },
       config,
       managementKey,
       clientKey,
       upstreamKey,
       stub,
-      child,
+      get child() {
+        return child;
+      },
+      stop: (force = false) => child.stop(force),
+      async restart(force = false) {
+        await child.stop(force);
+        insist(hash(readOwnedFile(binary, 128 * MiB)) === binaryHash);
+        child = spawnOwned(binary, ['--config', filename, '--local-model'], {
+          cwd: path.dirname(filename),
+          env: childEnvironment(home),
+          signal,
+        });
+        await ready();
+      },
+      async startCandidate(name = 'candidate') {
+        insist(spec.id.startsWith('AQ04-S') && ['candidate', 'recovered'].includes(name));
+        await child.stop();
+        const target = path.join(root, name);
+        ownedDirectory(target);
+        filename = path.join(target, 'config.yaml');
+        readOwnedFile(filename);
+        home = path.join(target, 'home');
+        authDir = path.join(target, 'auth');
+        ownedDirectory(home);
+        insist(hash(readOwnedFile(binary, 128 * MiB)) === binaryHash);
+        child = spawnOwned(binary, ['--config', filename, '--local-model'], {
+          cwd: target,
+          env: childEnvironment(home),
+          signal,
+        });
+        await ready();
+      },
+      loopbackRequest: boundedRequest,
       request,
       mgmt,
       data,
@@ -1431,6 +1443,10 @@ export async function naturalExpiry(f, now = () => performance.now(), wait = del
 }
 
 export function selectCases(manifest, caseSet) {
+  if (caseSet === 'usage-stage-r4') {
+    insist(manifest.revision === 'r4');
+    return manifest.cases.filter((c) => /^AQ04-[US]/.test(c.id));
+  }
   if (caseSet === 'external-safety-r3') {
     insist(manifest.revision === 'r3');
     return manifest.cases.filter((c) => c.id.startsWith('AQ03-'));
@@ -1565,6 +1581,8 @@ async function execute(options, manifest, manifestBytes) {
     'prepare-cpa-v8-artifact.py',
     'validate-cpa-v8-evidence.mjs',
     'cpa-v8-external-fixtures.mjs',
+    'cpa-v8-usage-fixtures.mjs',
+    'cpa-v8-stage-fixtures.mjs',
   ];
   insist(
     sources.every(
@@ -1663,11 +1681,24 @@ async function execute(options, manifest, manifestBytes) {
             true
           );
         else {
-          const resultData = spec.id.startsWith('AQ03-')
+          const resultData = spec.id.startsWith('AQ04-')
             ? await (
-                await import(pathToFileURL(path.join(HERE, 'cpa-v8-external-fixtures.mjs')).href)
-              ).dispatchExternal(spec, fixture)
-            : await dispatchManagement(spec, fixture);
+                await import(
+                  pathToFileURL(
+                    path.join(
+                      HERE,
+                      spec.id.startsWith('AQ04-U')
+                        ? 'cpa-v8-usage-fixtures.mjs'
+                        : 'cpa-v8-stage-fixtures.mjs'
+                    )
+                  ).href
+                )
+              ).dispatchUsageStage(spec, fixture)
+            : spec.id.startsWith('AQ03-')
+              ? await (
+                  await import(pathToFileURL(path.join(HERE, 'cpa-v8-external-fixtures.mjs')).href)
+                ).dispatchExternal(spec, fixture)
+              : await dispatchManagement(spec, fixture);
           recordResult(
             report,
             result,
@@ -1772,7 +1803,9 @@ export async function runCli(argv) {
       (options.run
         ? !options.archive ||
           !options.outputParent ||
-          !['management-r2', 'oauth-expiry-r2', 'external-safety-r3'].includes(options.caseSet)
+          !['management-r2', 'oauth-expiry-r2', 'external-safety-r3', 'usage-stage-r4'].includes(
+            options.caseSet
+          )
         : Object.keys(options).length !== 1)
     )
       return { exitCode: 2, summary: { validationStatus: 'invalid', errorCode: 'USAGE' } };
@@ -1782,10 +1815,14 @@ export async function runCli(argv) {
     const bytes = readOwnedFile(path.resolve(options.manifest));
     const manifest = JSON.parse(bytes);
     insist(
-      ['r2', 'r3'].includes(manifest.revision) &&
+      ['r2', 'r3', 'r4'].includes(manifest.revision) &&
         same(
           manifest,
-          manifest.revision === 'r3' ? createExternalManifest() : createManagementManifest()
+          manifest.revision === 'r4'
+            ? createUsageStageManifest()
+            : manifest.revision === 'r3'
+              ? createExternalManifest()
+              : createManagementManifest()
         )
     );
     if (!options.run) return { exitCode: 0, summary: validation };

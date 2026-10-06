@@ -359,6 +359,18 @@ setTimeout(()=>http.createServer((req,res)=>{
     expect((await request(stub.port, options)).status).toBe(503);
     expect(stub.requests).toBe(2);
   });
+  it('AQ-04 proves forced owned shutdown before exposing stopped state', async () => {
+    const child = spawnOwned(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
+      cwd: root,
+      env: childEnvironment(root),
+    });
+    cleanups.push(() => child.stop());
+    expect(child.stopped).toBe(false);
+    await child.stop(true);
+    expect(child.stopped).toBe(true);
+    expect(child.alive).toBe(false);
+    await child.stop(true);
+  });
   it('V11 response loss sends a mutation once and permits a separate readback', async () => {
     let count = 0,
       value;

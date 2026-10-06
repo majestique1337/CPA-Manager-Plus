@@ -1,8 +1,72 @@
 # CPA v8 qualification evidence
 
+## AQ-04 r4 Usage and Stage fixtures
+
+The current manifest has **55 declarations**. `usage-stage-r4` selects **40 leaves
+in 34 groups** (18 Usage, 16 Stage). Thirteen other operations plus the maximum
+natural retention and observed subscriber overflow leaves remain pending. The
+schema, 16 operations, seven profiles and r1 profile composition are unchanged.
+`createSeedManifest()`, `createManagementManifest()` and `createExternalManifest()`
+preserve their original catalogues; no earlier results are copied into r4.
+The implementation base is AQ-03 merge `4343c7aa597fa133aa112d45dcec5ca07e8dd33a`.
+
+All r4 cases use `standard-r1`: request five seconds, header 32 KiB, decoded body
+one MiB, startup 30 seconds, case 90 seconds, slice 15 minutes. Queue reads consume
+records. There is no consuming retry, transport fallback, peek, ACK or cursor.
+Each case uses at most 32 pops, 16 records per pop and 512 ordinary records;
+pressure is bounded by 1,024 records and 32 MiB. The selected slow-reader fixture
+produces 64 records and does not claim an observed 256-slot overflow.
+
+Usage cases compare synthetic model forwarding, private record identities,
+consumer receipts, HTTP competition, RESP fanout/pop, separate statistics and
+queue disabling, and process restart. The loss relay fully captures a bounded
+upstream receipt before dropping the consumer response. An early disconnect
+keeps its cutpoint unknown. Local duplicate/coverage projections always preserve
+unknown gaps and unproven replay. Raw usage IDs, keys, headers, source fields and
+tokens stay private; report records contain only the existing typed assertions.
+
+Retention experiments wait actual five and 60 seconds, with paired receipt and
+fresh-producer controls. An empty result alone is not proof of expiry, loss or
+zero usage; enqueue timestamps remain unobserved. An omitted retention document
+leaf returns 404, and explicit 0/-1/3601 values are read back unchanged. Those
+GETs do not prove the effective default or runtime clamp. The one-hour natural
+window and an actual subscriber overflow remain unselected required evidence.
+
+Stage uses three synthetic source shapes: legacy with a prepared hash, mixed
+legacy/v8, and v8 with synthetic credential metadata. A separate preparation
+process obtains the hash; the frozen source is never launched. Complete sibling
+source/snapshot/candidate trees include regular files, directories, modes and
+absence, bounded to 64 members, one MiB per file and 16 MiB total. Links, aliases,
+special files and unstable identities are rejected. Candidate runtime paths are
+rebound before launch. Source integrity is checked at every cutpoint and after
+owned child shutdown. Startup writes, semantic reads, persistent mutation,
+lost-reply reconciliation and later writes are distinguished.
+
+Restoration requires a confirmed stopped child, complete snapshot, unchanged
+source, known committed state and an exact one-use checkpoint. A later write,
+binding change or tamper denies restoration. The complete snapshot is restored
+to a new candidate, including absence of new auth/state, then runtime paths and
+real AUTH/CFG/KEY/CRED/MODEL controls are checked again. This is harness evidence;
+it establishes no production rollback, crash atomicity or real legacy upgrade.
+
+The read-only candidate control first proves write-open is denied. macOS Docker
+shared directories can report mode 0400 while permitting writes, so use a fresh
+Linux-owned backing directory for the `/work` bind mount when needed. The CPA
+container still has exactly four recorded bind mounts, no network, a read-only
+root, non-root UID, no capabilities and bounded resources. Create/own that empty
+directory before starting CPA, retain its mount identity, and copy only the final
+sanitized output after private fixture cleanup. Never accept missing permission
+enforcement as a passing read-only control.
+
+Run `tests/cpaV8UsageStage.test.mjs` together with the runner, evidence, External
+and classifier tests, then `npm run test:repo`. Build from committed source and
+verify both new helper hashes in the image identity. All function observations
+remain limited; harness/guard leaves stay unknown. Formal independent acceptance,
+real provider gaps and Phase4A remain pending even when every selected case passes.
+
 ## AQ-03 r3 External safety fixtures
 
-The current manifest contains **64 declarations**, selecting **50 leaves in 28
+The historical r3 manifest contains **64 declarations**, selecting **50 leaves in 28
 groups** through `--case-set external-safety-r3`. The remaining 14 entries keep
 other operations explicitly pending. Historical r1 and r2 manifests are retained
 by their original factories; their complete original leaves and reports remain
@@ -38,7 +102,7 @@ unaccepted or inappropriate evidence.
 
 Run the four focused test files (including `tests/cpaV8ExternalSafety.test.mjs`),
 then `npm run test:repo`. The isolated procedure below also applies to r3; use
-`external-safety-r3` and the current canonical manifest. Build from committed
+`external-safety-r3` and its frozen `createExternalManifest()` manifest. Build from committed
 source and include `bin/ci/cpa-v8-external-fixtures.mjs` in the source/hash audit.
 Every runtime input remains local to the owned network-none container.
 
