@@ -27,6 +27,7 @@ const {
   createManagementManifest,
   createExternalManifest,
   createUsageStageManifest,
+  createExtensionManifest,
   validateEvidence,
 } = await import(pathToFileURL(path.join(HERE, 'validate-cpa-v8-evidence.mjs')).href);
 const MANAGEMENT = '/v8/management';
@@ -1815,14 +1816,16 @@ export async function runCli(argv) {
     const bytes = readOwnedFile(path.resolve(options.manifest));
     const manifest = JSON.parse(bytes);
     insist(
-      ['r2', 'r3', 'r4'].includes(manifest.revision) &&
+      ['r2', 'r3', 'r4', 'r5'].includes(manifest.revision) &&
         same(
           manifest,
-          manifest.revision === 'r4'
-            ? createUsageStageManifest()
-            : manifest.revision === 'r3'
-              ? createExternalManifest()
-              : createManagementManifest()
+          manifest.revision === 'r5'
+            ? createExtensionManifest()
+            : manifest.revision === 'r4'
+              ? createUsageStageManifest()
+              : manifest.revision === 'r3'
+                ? createExternalManifest()
+                : createManagementManifest()
         )
     );
     if (!options.run) return { exitCode: 0, summary: validation };

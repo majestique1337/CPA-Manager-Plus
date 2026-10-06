@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "contractId": "cpamp-cpa-v8-qualification",
-  "revision": "r4",
+  "revision": "r5",
   "planInput": {
     "planCommit": "b654d625902c0e810f9bfc581aa17c35f4b0cff0",
     "gateBlobSha": "d5367e63d4feda5854d0639746c18d6a78e0b274",
-    "scopeRevision": "r4"
+    "scopeRevision": "r5"
   },
-  "cpampBaselineCommit": "4343c7aa597fa133aa112d45dcec5ca07e8dd33a",
+  "cpampBaselineCommit": "aacf002b9b80bad3fbebb84f5478ca89cd0ff4ef",
   "candidate": {
     "id": "CPA8-8.0.13-linux-amd64-plugin",
     "version": "v8.0.13",
@@ -801,6 +801,24 @@
       "lifecycle": "declared",
       "configProfileId": "usage-stage-owned-r4",
       "modeProfileId": "linux-amd64-network-none-r4"
+    },
+    {
+      "id": "CPA8-EXTENSION-boundary-deny-r5",
+      "revision": "r5",
+      "kind": "boundary-deny",
+      "proofScope": "boundary-guard",
+      "lifecycle": "declared",
+      "configProfileId": "inert-extension-r5",
+      "modeProfileId": "offline-fixture-r5"
+    },
+    {
+      "id": "CPA8-EXTENSION-local-stub-r5",
+      "revision": "r5",
+      "kind": "local-stub",
+      "proofScope": "harness-behavior",
+      "lifecycle": "declared",
+      "configProfileId": "inert-extension-r5",
+      "modeProfileId": "offline-fixture-r5"
     }
   ],
   "cases": [
@@ -1022,20 +1040,60 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ01-EXT-GUARD-01",
-      "operationRef": "EXT-GUARD-01",
+      "id": "AQ01-USAGE-01",
+      "operationRef": "USAGE-01",
       "profileRefs": [
-        "CPA8-EXTENSION-GUARD-r1",
-        "CPA8-EXTENSION-ENABLE-r1"
+        "CPA8-USAGE-MIN-r1"
       ],
       "surfaceRefs": [
-        "EXT-GUARD-01-S1"
+        "USAGE-01-S1",
+        "USAGE-01-S2"
       ],
-      "fixtureRef": "CPA8-GUARD-r1",
-      "proofScope": "boundary-guard",
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
       "expectations": [
         {
-          "id": "EXT-GUARD-01-DECLARED",
+          "id": "USAGE-01-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-USAGE-02",
+      "operationRef": "USAGE-02",
+      "profileRefs": [
+        "CPA8-USAGE-MIN-r1"
+      ],
+      "surfaceRefs": [
+        "USAGE-02-S1"
+      ],
+      "fixtureRef": "CPA8-UPSTREAM-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "USAGE-02-DECLARED",
+          "mandatory": true,
+          "checkCode": "COVERAGE"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ01-STAGE-01",
+      "operationRef": "STAGE-01",
+      "profileRefs": [
+        "CPA8-STAGE-r1"
+      ],
+      "surfaceRefs": [
+        "STAGE-01-S1"
+      ],
+      "fixtureRef": "CPA8-STAGE-r1",
+      "proofScope": "upstream-function",
+      "expectations": [
+        {
+          "id": "STAGE-01-DECLARED",
           "mandatory": true,
           "checkCode": "COVERAGE"
         }
@@ -1087,1139 +1145,29 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ04-U01-config",
-      "operationRef": "USAGE-01",
+      "id": "AQ05-G01-protected",
+      "operationRef": "EXT-GUARD-01",
       "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
+        "CPA8-EXTENSION-GUARD-r1"
       ],
       "surfaceRefs": [
-        "USAGE-01-S1"
+        "EXT-GUARD-01-S1"
       ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U01-config-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U01-config-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U01-config-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U02-enable",
-      "operationRef": "USAGE-01",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U02-enable-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U02-enable-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U02-enable-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U02-receipt",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U02-receipt-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U02-receipt-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U02-receipt-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U03-batch",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U03-batch-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U03-batch-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U03-batch-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U04-disable",
-      "operationRef": "USAGE-01",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U04-disable-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U04-disable-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U04-disable-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U04-backlog",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U04-backlog-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U04-backlog-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U04-backlog-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U05-availability",
-      "operationRef": "USAGE-01",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U05-availability-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U05-availability-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U05-availability-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U05-clear",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U05-clear-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U05-clear-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U05-clear-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U06-five-seconds",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U06-five-seconds-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U06-five-seconds-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U06-five-seconds-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U07-sixty-seconds",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U07-sixty-seconds-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U07-sixty-seconds-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U07-sixty-seconds-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U08-bounds",
-      "operationRef": "USAGE-01",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U08-bounds-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U08-bounds-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U08-bounds-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U09-pop",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U09-pop-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U09-pop-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U09-pop-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U09-relay",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-U09-relay-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U09-relay-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U09-relay-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U10-unknown-cutpoint",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-U10-unknown-cutpoint-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U10-unknown-cutpoint-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U10-unknown-cutpoint-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U11-projection",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-U11-projection-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U11-projection-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U11-projection-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U12-graceful",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U12-graceful-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U12-graceful-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U12-graceful-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U13-forced",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U13-forced-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U13-forced-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U13-forced-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U14-competition",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U14-competition-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U14-competition-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U14-competition-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U15-subscribe",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U15-subscribe-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U15-subscribe-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U15-subscribe-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U16-fanout",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U16-fanout-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U16-fanout-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U16-fanout-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U17-pressure",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-U17-pressure-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U17-pressure-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U17-pressure-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U17-overflow-unknown",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-U17-overflow-unknown-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U17-overflow-unknown-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U17-overflow-unknown-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-U18-binding",
-      "operationRef": "USAGE-02",
-      "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
-      ],
-      "surfaceRefs": [
-        "USAGE-02-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-U18-binding-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U18-binding-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-U18-binding-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S01-snapshot",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-S01-snapshot-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S01-snapshot-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S01-snapshot-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S02-legacy",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S02-legacy-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S02-legacy-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S02-legacy-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S03-plaintext",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S03-plaintext-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S03-plaintext-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S03-plaintext-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S04-mixed",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S04-mixed-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S04-mixed-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S04-mixed-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S05-v8",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S05-v8-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S05-v8-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S05-v8-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S06-paths",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S06-paths-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S06-paths-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S06-paths-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S07-invalid",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S07-invalid-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S07-invalid-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S07-invalid-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S08-readonly",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S08-readonly-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S08-readonly-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S08-readonly-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S09-commit",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S09-commit-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S09-commit-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S09-commit-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S10-rejected",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S10-rejected-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S10-rejected-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S10-rejected-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S11-reconcile",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-S1"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
-      "expectations": [
-        {
-          "id": "AQ04-S11-reconcile-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S11-reconcile-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S11-reconcile-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S11-lost-reply",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-S11-lost-reply-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S11-lost-reply-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S11-lost-reply-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S12-precommit",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-S12-precommit-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S12-precommit-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S12-precommit-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S13-restore",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
-      "proofScope": "harness-behavior",
-      "expectations": [
-        {
-          "id": "AQ04-S13-restore-OBSERVATION",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S13-restore-STATE",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        },
-        {
-          "id": "AQ04-S13-restore-CONTROL",
-          "mandatory": true,
-          "checkCode": "POSTCONDITION"
-        }
-      ],
-      "budgetRef": "standard-r1"
-    },
-    {
-      "id": "AQ04-S14-fence",
-      "operationRef": "STAGE-01",
-      "profileRefs": [
-        "CPA8-STAGE-r1"
-      ],
-      "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
-      ],
-      "fixtureRef": "CPA8-USAGE-STAGE-boundary-deny-r4",
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
       "proofScope": "boundary-guard",
       "expectations": [
         {
-          "id": "AQ04-S14-fence-OBSERVATION",
+          "id": "AQ05-G01-protected-DECISION",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S14-fence-STATE",
+          "id": "AQ05-G01-protected-DISPATCH",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S14-fence-CONTROL",
+          "id": "AQ05-G01-protected-DELIVERY",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         }
@@ -2227,29 +1175,29 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ04-S15-tamper",
-      "operationRef": "STAGE-01",
+      "id": "AQ05-G02-public",
+      "operationRef": "EXT-GUARD-01",
       "profileRefs": [
-        "CPA8-STAGE-r1"
+        "CPA8-EXTENSION-GUARD-r1"
       ],
       "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
+        "EXT-GUARD-01-S1"
       ],
-      "fixtureRef": "CPA8-USAGE-STAGE-boundary-deny-r4",
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
       "proofScope": "boundary-guard",
       "expectations": [
         {
-          "id": "AQ04-S15-tamper-OBSERVATION",
+          "id": "AQ05-G02-public-DECISION",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S15-tamper-STATE",
+          "id": "AQ05-G02-public-DISPATCH",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S15-tamper-CONTROL",
+          "id": "AQ05-G02-public-DELIVERY",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         }
@@ -2257,29 +1205,1619 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ04-S16-crash",
-      "operationRef": "STAGE-01",
+      "id": "AQ05-G03-unknown",
+      "operationRef": "EXT-GUARD-01",
       "profileRefs": [
-        "CPA8-STAGE-r1"
+        "CPA8-EXTENSION-GUARD-r1"
       ],
       "surfaceRefs": [
-        "STAGE-01-FIXTURE-r4"
+        "EXT-GUARD-01-S1"
       ],
-      "fixtureRef": "CPA8-USAGE-STAGE-local-stub-r4",
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G03-unknown-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G03-unknown-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G03-unknown-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G03-absent",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G03-absent-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G03-absent-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G03-absent-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G04-menu",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G04-menu-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-menu-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-menu-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G04-header",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G04-header-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-header-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-header-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G04-list",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G04-list-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-list-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-list-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G04-hash",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G04-hash-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-hash-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G04-hash-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G05-core",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G05-core-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-core-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-core-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G05-custom",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G05-custom-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-custom-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-custom-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G05-unknown-v0",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G05-unknown-v0-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-unknown-v0-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G05-unknown-v0-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G06-duplicate",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G06-duplicate-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-duplicate-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-duplicate-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G06-same-plugin",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G06-same-plugin-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-same-plugin-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-same-plugin-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G06-core-collision",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G06-core-collision-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-core-collision-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G06-core-collision-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G07-plugin",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G07-plugin-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G07-plugin-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G07-plugin-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G07-resource",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G07-resource-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G07-resource-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G07-resource-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G08-wildcard",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G08-wildcard-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-wildcard-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-wildcard-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G08-prefix",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G08-prefix-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-prefix-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-prefix-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G08-host",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G08-host-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-host-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G08-host-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G09-POST",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G09-POST-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-POST-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-POST-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G09-HEAD",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G09-HEAD-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-HEAD-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-HEAD-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G09-OPTIONS",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G09-OPTIONS-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-OPTIONS-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-OPTIONS-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G09-override",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G09-override-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-override-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G09-override-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G10-dot",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G10-dot-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-dot-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-dot-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G10-dot-encoded",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G10-dot-encoded-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-dot-encoded-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-dot-encoded-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G10-slash-encoded",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G10-slash-encoded-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-slash-encoded-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-slash-encoded-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G10-double-encoded",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G10-double-encoded-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-double-encoded-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-double-encoded-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G10-encoded-letter",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G10-encoded-letter-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-encoded-letter-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G10-encoded-letter-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G11-backslash",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G11-backslash-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-backslash-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-backslash-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G11-duplicate-slash",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G11-duplicate-slash-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-duplicate-slash-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-duplicate-slash-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G11-trailing-slash",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G11-trailing-slash-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-trailing-slash-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G11-trailing-slash-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G12-absolute",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G12-absolute-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-absolute-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-absolute-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G12-userinfo",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G12-userinfo-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-userinfo-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-userinfo-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G12-fragment",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G12-fragment-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-fragment-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-fragment-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G12-query",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G12-query-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-query-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-query-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G12-control",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G12-control-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-control-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G12-control-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G13-missing",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G13-missing-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-missing-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-missing-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G13-unknown",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G13-unknown-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-unknown-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-unknown-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G13-capability",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G13-capability-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-capability-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-capability-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G13-public-mutation",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G13-public-mutation-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-public-mutation-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G13-public-mutation-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G14-disabled",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G14-disabled-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-disabled-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-disabled-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G14-uninstalled",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G14-uninstalled-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-uninstalled-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-uninstalled-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G14-revoked",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G14-revoked-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-revoked-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G14-revoked-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G15-manifest",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G15-manifest-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-manifest-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-manifest-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G15-source",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G15-source-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-source-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-source-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G15-version",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G15-version-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-version-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G15-version-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G16-connection",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G16-connection-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-connection-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-connection-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G16-credential",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G16-credential-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-credential-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-credential-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G16-profile",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G16-profile-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-profile-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G16-profile-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G17-queued",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G17-queued-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-queued-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-queued-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G17-late",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G17-late-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-late-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-late-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G17-queued-aba",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G17-queued-aba-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-queued-aba-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-queued-aba-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G17-late-aba",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G17-late-aba-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-late-aba-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G17-late-aba-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G18-protected-headers",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G18-protected-headers-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G18-protected-headers-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G18-protected-headers-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G19-public-headers",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G19-public-headers-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G19-public-headers-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G19-public-headers-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G20-301",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
       "proofScope": "harness-behavior",
       "expectations": [
         {
-          "id": "AQ04-S16-crash-OBSERVATION",
+          "id": "AQ05-G20-301-DECISION",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S16-crash-STATE",
+          "id": "AQ05-G20-301-DISPATCH",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-S16-crash-CONTROL",
+          "id": "AQ05-G20-301-DELIVERY",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         }
@@ -2287,29 +2825,29 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ04-P01-max-natural-retention",
-      "operationRef": "USAGE-02",
+      "id": "AQ05-G20-302",
+      "operationRef": "EXT-GUARD-01",
       "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
+        "CPA8-EXTENSION-GUARD-r1"
       ],
       "surfaceRefs": [
-        "USAGE-02-S1"
+        "EXT-GUARD-01-S1"
       ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
       "expectations": [
         {
-          "id": "AQ04-P01-max-natural-retention-OBSERVATION",
+          "id": "AQ05-G20-302-DECISION",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-P01-max-natural-retention-STATE",
+          "id": "AQ05-G20-302-DISPATCH",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-P01-max-natural-retention-CONTROL",
+          "id": "AQ05-G20-302-DELIVERY",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         }
@@ -2317,29 +2855,659 @@
       "budgetRef": "standard-r1"
     },
     {
-      "id": "AQ04-P02-observed-subscriber-overflow",
-      "operationRef": "USAGE-02",
+      "id": "AQ05-G20-303",
+      "operationRef": "EXT-GUARD-01",
       "profileRefs": [
-        "CPA8-USAGE-MIN-r1"
+        "CPA8-EXTENSION-GUARD-r1"
       ],
       "surfaceRefs": [
-        "USAGE-02-S1"
+        "EXT-GUARD-01-S1"
       ],
-      "fixtureRef": "CPA8-USAGE-STAGE-upstream-real-r4",
-      "proofScope": "upstream-function",
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
       "expectations": [
         {
-          "id": "AQ04-P02-observed-subscriber-overflow-OBSERVATION",
+          "id": "AQ05-G20-303-DECISION",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-P02-observed-subscriber-overflow-STATE",
+          "id": "AQ05-G20-303-DISPATCH",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         },
         {
-          "id": "AQ04-P02-observed-subscriber-overflow-CONTROL",
+          "id": "AQ05-G20-303-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G20-307",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G20-307-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-307-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-307-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G20-308",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G20-308-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-308-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-308-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G20-cookie",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G20-cookie-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-cookie-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-cookie-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G20-location",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G20-location-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-location-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G20-location-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G21-html",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G21-html-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-html-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-html-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G21-javascript",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G21-javascript-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-javascript-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-javascript-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G21-mime",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G21-mime-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-mime-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-mime-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G21-unsafe-header",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G21-unsafe-header-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-unsafe-header-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G21-unsafe-header-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-json",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-json-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-json-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-json-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-text",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-text-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-text-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-text-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-body-limit",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-body-limit-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-body-limit-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-body-limit-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-header-limit",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-header-limit-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-header-limit-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-header-limit-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-status",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-status-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-status-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-status-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-shape",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-shape-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-shape-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-shape-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G22-invalid-json",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-local-stub-r5",
+      "proofScope": "harness-behavior",
+      "expectations": [
+        {
+          "id": "AQ05-G22-invalid-json-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-invalid-json-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G22-invalid-json-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G23-exception",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G23-exception-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-exception-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-exception-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G23-stale-grant",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G23-stale-grant-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-stale-grant-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-stale-grant-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G23-policy",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G23-policy-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-policy-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-policy-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G23-partial-registry",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G23-partial-registry-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-partial-registry-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G23-partial-registry-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G24-native",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G24-native-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G24-native-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G24-native-DELIVERY",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        }
+      ],
+      "budgetRef": "standard-r1"
+    },
+    {
+      "id": "AQ05-G24-browser",
+      "operationRef": "EXT-GUARD-01",
+      "profileRefs": [
+        "CPA8-EXTENSION-GUARD-r1"
+      ],
+      "surfaceRefs": [
+        "EXT-GUARD-01-S1"
+      ],
+      "fixtureRef": "CPA8-EXTENSION-boundary-deny-r5",
+      "proofScope": "boundary-guard",
+      "expectations": [
+        {
+          "id": "AQ05-G24-browser-DECISION",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G24-browser-DISPATCH",
+          "mandatory": true,
+          "checkCode": "POSTCONDITION"
+        },
+        {
+          "id": "AQ05-G24-browser-DELIVERY",
           "mandatory": true,
           "checkCode": "POSTCONDITION"
         }
