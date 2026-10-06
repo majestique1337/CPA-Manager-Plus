@@ -286,7 +286,7 @@ describe('AQ-05 tool boundaries', () => {
   });
   it('V-AQ05-12 evaluator cannot call a transport or process spawn', () => {
     const entry = path.resolve('bin/ci/cpa-v8-extension-fixtures.mjs');
-    const script = `import http from 'node:http';import https from 'node:https';import net from 'node:net';import cp from 'node:child_process';import {syncBuiltinESMExports}from'node:module';import{pathToFileURL}from'node:url';const trap=()=>{throw Error('forbidden')};http.request=https.request=net.connect=cp.spawn=cp.spawnSync=trap;globalThis.fetch=trap;syncBuiltinESMExports();const{evaluateExtensionCase}=await import(pathToFileURL(process.argv[1]));const{createExtensionManifest}=await import(pathToFileURL(process.argv[2]));const results=createExtensionManifest().cases.filter(c=>c.id.startsWith('AQ05-')).map(evaluateExtensionCase);process.stdout.write(JSON.stringify({pass:results.every(r=>r.checks.every(Boolean)),count:results.length}));`;
+    const script = `import http from 'node:http';import https from 'node:https';import net from 'node:net';import cp from 'node:child_process';import {syncBuiltinESMExports}from'node:module';import{pathToFileURL}from'node:url';let calls=0;const trap=()=>{calls++;throw Error('forbidden')};http.request=https.request=net.connect=cp.spawn=cp.spawnSync=trap;globalThis.fetch=trap;syncBuiltinESMExports();const{evaluateExtensionCase}=await import(pathToFileURL(process.argv[1]));const{createExtensionManifest}=await import(pathToFileURL(process.argv[2]));const results=createExtensionManifest().cases.filter(c=>c.id.startsWith('AQ05-')).map(evaluateExtensionCase);process.stdout.write(JSON.stringify({pass:results.every(r=>r.checks.every(Boolean)),count:results.length,calls}));`;
     const child = spawnSync(
       process.execPath,
       [
@@ -300,6 +300,6 @@ describe('AQ-05 tool boundaries', () => {
     );
     expect(child.status).toBe(0);
     expect(child.stderr).toBe('');
-    expect(JSON.parse(child.stdout)).toEqual({ pass: true, count: 79 });
+    expect(JSON.parse(child.stdout)).toEqual({ pass: true, count: 79, calls: 0 });
   });
 });
