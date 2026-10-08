@@ -3,14 +3,16 @@ import { useTranslation } from 'react-i18next';
 import {
   CLAUDE_HUE,
   CODEX_HUE,
+  OTHER_HUE,
   fmtTokens,
+  modelPalette,
+  prettyModel,
   type HeatCell,
   type LocalUsageSummary,
   type RankedItem,
   type TrendDay,
 } from '../localUsageModel';
 import styles from './Panels.module.scss';
-
 
 const fmtUsd = (n: number) =>
   n >= 100 ? `$${Math.round(n).toLocaleString('en-US')}` : `$${n.toFixed(2)}`;
@@ -26,12 +28,20 @@ export function SpendTile({ summary }: { summary: LocalUsageSummary }) {
   return (
     <section className={styles.tile}>
       <header className={styles.tileHead}>
-        <h2>{summary.since && summary.coverageDays < 30
+        <h2>
+          {summary.since && summary.coverageDays < summary.days
             ? `Spend since ${shortDate(summary.since)}`
-            : t('dashboard.spend', { defaultValue: 'Spend, last 30 days' })}</h2>
+            : t('dashboard.spend', { defaultValue: `Spend, last ${summary.days} days` })}
+        </h2>
       </header>
       <div>
         <div className={`${styles.spendValue} ${styles.numeral}`}>{fmtUsd(summary.spend)}</div>
+        {summary.prevSpend > 0 && summary.coverageDays >= 2 * summary.days ? (
+          <p className={styles.delta} data-up={summary.spend >= summary.prevSpend}>
+            {summary.spend >= summary.prevSpend ? '↑' : '↓'}{' '}
+            {Math.abs(Math.round((summary.spend / summary.prevSpend - 1) * 100))}% vs previous {summary.days} days
+          </p>
+        ) : null}
         <p className={styles.spendNote}>
           {t('dashboard.spend_note', { defaultValue: 'What this would cost at API list prices' })}
         </p>
@@ -64,24 +74,31 @@ export function SpendTile({ summary }: { summary: LocalUsageSummary }) {
   );
 }
 
-export function TrendTile({ trend }: { trend: TrendDay[] }) {
+export function TrendTile({ trend, models }: { trend: TrendDay[]; models: RankedItem[] }) {
   const { t } = useTranslation();
   const [hover, setHover] = useState<number | null>(null);
-  const peak = useMemo(() => Math.max(1, ...trend.map((d) => d.claude + d.codex)), [trend]);
+  const sumOf = (d: TrendDay) => d.claude + d.codex;
+  const peak = useMemo(() => Math.max(1, ...trend.map(sumOf)), [trend]);
   const active = hover !== null ? trend[hover] : null;
+  const top = models.map((m) => m.name);
   return (
     <section className={styles.tile}>
       <header className={styles.tileHead}>
         <h2>{t('dashboard.trend', { defaultValue: 'Tokens per day' })}</h2>
         <span className={styles.tileMeta}>
           {active
-            ? `${shortDate(active.date)}: ${fmtTokens(active.claude + active.codex)}`
+            ? `${shortDate(active.date)}: ${fmtTokens(sumOf(active))}`
             : `Busiest ${fmtTokens(peak)}`}
         </span>
       </header>
       <div className={styles.trend} onMouseLeave={() => setHover(null)}>
         {trend.map((day, index) => {
-          const sum = day.claude + day.codex;
+          const sum = sumOf(day);
+          const known = top.reduce((n, m) => n + (day.byModel[m] ?? 0), 0);
+          const segments = [
+            ...top.map((m, i) => ({ v: day.byModel[m] ?? 0, hue: modelPalette(i) })),
+            { v: sum - known, hue: OTHER_HUE },
+          ];
           return (
             <div
               key={day.date}
@@ -94,10 +111,12 @@ export function TrendTile({ trend }: { trend: TrendDay[] }) {
               {sum === 0 ? (
                 <em />
               ) : (
-                <>
-                  <span style={{ height: `${(day.codex / peak) * 100}%`, ['--swatch' as string]: CODEX_HUE }} />
-                  <span style={{ height: `${(day.claude / peak) * 100}%`, ['--swatch' as string]: CLAUDE_HUE }} />
-                </>
+                segments.map((seg, i) => (
+                  <span
+                    key={i}
+                    style={{ height: `${(seg.v / peak) * 100}%`, ['--swatch' as string]: seg.hue }}
+                  />
+                ))
               )}
             </div>
           );
@@ -106,6 +125,14 @@ export function TrendTile({ trend }: { trend: TrendDay[] }) {
       <div className={styles.axis}>
         <span>{shortDate(trend[0].date)}</span>
         <span>{shortDate(trend[trend.length - 1].date)}</span>
+      </div>
+      <div className={styles.legend}>
+        {top.map((m, i) => (
+          <span key={m} style={{ ['--swatch' as string]: modelPalette(i) }}>
+            <i />
+            {prettyModel(m)}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -129,16 +156,25 @@ export function RankTile({
         <h2>{title}</h2>
       </header>
       {items.length === 0 ? (
-        <p className={styles.quiet}>Nothing recorded in the last 30 days.</p>
+        <p className={styles.quiet}>Nothing recorded in this period.</p>
       ) : (
         <ul className={styles.ranks}>
           {items.map((item) => (
-            <li key={item.name} className={styles.rank} title={`${item.name} · ${fmtUsd(item.cost)}`}>
+            <li
+              key={item.name}
+              className={styles.rank}
+              title={`${item.name} · ${fmtUsd(item.cost)}`}
+            >
               <span className={styles.rankName}>{label ? label(item.name) : item.name}</span>
-              <span className={styles.rankBar} style={{ ['--swatch' as string]: hueOf?.(item.name) }}>
+              <span
+                className={styles.rankBar}
+                style={{ ['--swatch' as string]: hueOf?.(item.name) }}
+              >
                 <span style={{ width: `${(item.tokens / peak) * 100}%` }} />
               </span>
-              <span className={`${styles.rankValue} ${styles.numeral}`}>{fmtTokens(item.tokens)}</span>
+              <span className={`${styles.rankValue} ${styles.numeral}`}>
+                {fmtTokens(item.tokens)}
+              </span>
             </li>
           ))}
         </ul>
@@ -153,9 +189,11 @@ export function HeatmapTile({ summary }: { summary: LocalUsageSummary }) {
   return (
     <section className={styles.tile}>
       <header className={styles.tileHead}>
-        <h2>{summary.since && summary.coverageDays < 91
+        <h2>
+          {summary.since && summary.coverageDays < 91
             ? `Since ${shortDate(summary.since)}`
-            : t('dashboard.activity', { defaultValue: 'Last 13 weeks' })}</h2>
+            : t('dashboard.activity', { defaultValue: 'Last 13 weeks' })}
+        </h2>
       </header>
       <div className={styles.heatWrap}>
         <div className={styles.heat} role="img" aria-label="Daily activity, last 13 weeks">
@@ -169,16 +207,22 @@ export function HeatmapTile({ summary }: { summary: LocalUsageSummary }) {
           ))}
         </div>
         <div className={styles.heatStats}>
-          <div className={`${styles.total} ${styles.numeral}`}>{fmtTokens(summary.totalTokens)}</div>
+          <div className={`${styles.total} ${styles.numeral}`}>
+            {fmtTokens(summary.totalTokens)}
+          </div>
           <dl>
             <dt>Active days</dt>
             <dd>{summary.activeDays}</dd>
             <dt>Streak</dt>
-            <dd>{summary.streak} {summary.streak === 1 ? 'day' : 'days'}</dd>
+            <dd>
+              {summary.streak} {summary.streak === 1 ? 'day' : 'days'}
+            </dd>
             {summary.busiest ? (
               <>
                 <dt>Busiest</dt>
-                <dd>{shortDate(summary.busiest.date)}, {fmtTokens(summary.busiest.tokens)}</dd>
+                <dd>
+                  {shortDate(summary.busiest.date)}, {fmtTokens(summary.busiest.tokens)}
+                </dd>
               </>
             ) : null}
           </dl>

@@ -38,7 +38,8 @@ const toneFor = (win: QuotaWindowView, nowMs: number): Tone => {
   return 'ok';
 };
 
-const formatPercent = (value: number) => (value >= 99.5 ? '100' : value < 0.5 ? '0' : Math.round(value));
+const formatPercent = (value: number) =>
+  value >= 99.5 ? '100' : value < 0.5 ? '0' : Math.round(value);
 
 function WindowMeter({ win, nowMs }: { win: QuotaWindowView; nowMs: number }) {
   const remaining = win.usedPercent === null ? null : 100 - win.usedPercent;
@@ -53,7 +54,14 @@ function WindowMeter({ win, nowMs }: { win: QuotaWindowView; nowMs: number }) {
         : pace === 'exhausted'
           ? 'Exhausted until reset'
           : undefined;
-  const label = win.scope ? `${win.label} ${win.scope}` : win.label;
+  const label = win.scope
+    ? `${win.label} ${win.scope}`
+    : win.kind === 'session'
+      ? 'Session'
+      : win.kind === 'weekly'
+        ? 'Week'
+        : win.label;
+  const reset = formatResetIn(win.resetAtMs, nowMs);
 
   return (
     <div className={styles.meter} title={paceHint}>
@@ -62,12 +70,22 @@ function WindowMeter({ win, nowMs }: { win: QuotaWindowView; nowMs: number }) {
       </span>
       <div className={styles.track} data-tone={tone}>
         <div className={styles.fill} style={{ width: `${remaining ?? 0}%` }} />
-        {elapsed !== null && <span className={styles.pace} style={{ left: `${(1 - elapsed) * 100}%` }} />}
+        {elapsed !== null && (
+          <span className={styles.pace} style={{ left: `${(1 - elapsed) * 100}%` }} />
+        )}
       </div>
       <span className={styles.meterValue} data-tone={tone}>
-        {remaining === null ? '—' : `${formatPercent(remaining)}%`}
+        {remaining === null ? (
+          '—'
+        ) : (
+          <>
+            {formatPercent(remaining)}%<small> left</small>
+          </>
+        )}
       </span>
-      <span className={styles.meterReset}>{formatResetIn(win.resetAtMs, nowMs)}</span>
+      <span className={styles.meterReset} title="Time until this window resets">
+        {reset === '—' || reset === 'now' ? reset : `in ${reset}`}
+      </span>
     </div>
   );
 }
@@ -128,7 +146,9 @@ export function CapacityBoard({ accounts, loading, nowMs }: CapacityBoardProps) 
       scored.sort((a, b) => b.score - a.score);
       const top = scored.length > 1 && scored[0].score >= 0 ? scored[0].account.id : null;
       const list = scored.map((s) => s.account);
-      const wide = list.some((a) => pickDisplayWindows(a).some((w) => w.kind === 'other' || w.scope));
+      const wide = list.some((a) =>
+        pickDisplayWindows(a).some((w) => w.kind === 'other' || w.scope)
+      );
       return { provider, accounts: list, burnId: top, wide };
     });
   }, [accounts, nowMs]);
@@ -157,34 +177,46 @@ export function CapacityBoard({ accounts, loading, nowMs }: CapacityBoardProps) 
   }
 
   return (
-    <div className={styles.providers}>
-      {groups.map(({ provider, accounts: list, burnId, wide }) => {
-        const summary = summarizeProvider(list);
-        return (
-          <section
-            key={provider}
-            className={styles.tile}
-            data-provider={provider}
-            data-wide={wide || undefined}
-            aria-label={PROVIDER_LABEL[provider]}
-          >
-            <header className={styles.tileHead}>
-              <h2>
-                <i aria-hidden />
-                {PROVIDER_LABEL[provider]}
-              </h2>
-              <span className={styles.tileMeta}>
-                {summary.remainingPercent !== null
-                  ? `${Math.round(summary.remainingPercent)}% of the week left`
-                  : `${list.length} ${list.length === 1 ? 'account' : 'accounts'}`}
-              </span>
-            </header>
-            {list.map((account) => (
-              <AccountBlock key={account.id} account={account} nowMs={nowMs} burnFirst={account.id === burnId} />
-            ))}
-          </section>
-        );
-      })}
-    </div>
+    <>
+      <div className={styles.providers}>
+        {groups.map(({ provider, accounts: list, burnId, wide }) => {
+          const summary = summarizeProvider(list);
+          return (
+            <section
+              key={provider}
+              className={styles.tile}
+              data-provider={provider}
+              data-wide={wide || undefined}
+              aria-label={PROVIDER_LABEL[provider]}
+            >
+              <header className={styles.tileHead}>
+                <h2>
+                  <i aria-hidden />
+                  {PROVIDER_LABEL[provider]}
+                </h2>
+                <span className={styles.tileMeta}>
+                  {summary.remainingPercent !== null
+                    ? `${Math.round(summary.remainingPercent)}% of the week left`
+                    : `${list.length} ${list.length === 1 ? 'account' : 'accounts'}`}
+                </span>
+              </header>
+              {list.map((account) => (
+                <AccountBlock
+                  key={account.id}
+                  account={account}
+                  nowMs={nowMs}
+                  burnFirst={account.id === burnId}
+                />
+              ))}
+            </section>
+          );
+        })}
+      </div>
+      <p className={styles.footnote}>
+        {t('dashboard.pace_legend', {
+          defaultValue: 'Bars show what is left. The tick marks where an even pace would put you.',
+        })}
+      </p>
+    </>
   );
 }

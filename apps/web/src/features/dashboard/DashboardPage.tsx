@@ -3,10 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { useHeaderRefresh } from '@/hooks/useHeaderRefresh';
 import { useAuthStore, useConfigStore } from '@/stores';
 import { normalizeRoutingStrategy } from '@/utils/routingStrategy';
+import { BreakdownCharts, KpiRow } from './components/OpenRouterTiles';
 import { AttentionPanel } from './components/AttentionPanel';
 import { CapacityBoard } from './components/CapacityBoard';
-import { HeatmapTile, RankTile, SpendTile, TrendTile } from './components/UsageTiles';
-import { modelHue, prettyModel } from './localUsageModel';
+import { HeatmapTile, RankTile, TrendTile } from './components/UsageTiles';
+import { PERIODS, modelHue, prettyModel, type Period } from './localUsageModel';
 import { UseFirstHero } from './components/UseFirstHero';
 import { useDashboardQuota } from './hooks/useDashboardQuota';
 import { useDashboardUsageSummary } from './hooks/useDashboardUsageSummary';
@@ -37,7 +38,8 @@ export function DashboardPage() {
   const config = useConfigStore((state) => state.config);
   const usage = useDashboardUsageSummary();
   const quota = useDashboardQuota();
-  const local = useLocalUsage();
+  const [period, setPeriod] = useState<Period>(30);
+  const local = useLocalUsage(period);
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
@@ -74,16 +76,24 @@ export function DashboardPage() {
         </div>
       </header>
 
-      <AttentionPanel accounts={quota.accounts} failures={usage.recentFailures} nowMs={nowMs} />
+      <AttentionPanel accounts={quota.accounts} failures={usage.recentFailures} nowMs={nowMs} routing={routingKey ?? ''} />
 
       <CapacityBoard accounts={quota.accounts} loading={quota.loading} nowMs={nowMs} />
 
       {local.summary ? (
         <>
-          <div className={styles.rowSpend}>
-            <SpendTile summary={local.summary} />
-            <TrendTile trend={local.summary.trend} />
+          <div className={styles.periods} role="group" aria-label="Period">
+            {PERIODS.map((d) => (
+              <button key={d} type="button" data-active={d === period} onClick={() => setPeriod(d)}>
+                {d}d
+              </button>
+            ))}
           </div>
+          <KpiRow summary={local.summary} />
+          <div className={styles.rowSpend}>
+            <TrendTile trend={local.summary.trend} models={local.summary.models} />
+          </div>
+          <BreakdownCharts trend={local.summary.trend} />
           <div className={styles.rowRanks}>
             <RankTile
               title={t('dashboard.models', { defaultValue: 'Models' })}

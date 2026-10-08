@@ -27,6 +27,14 @@ export interface TrendDay {
   date: string;
   claude: number;
   codex: number;
+  /** Tokens per model, for the stacked bars. */
+  byModel: Record<string, number>;
+  /** Token kinds and spend for the day, for KPI sparklines and the breakdown charts. */
+  in: number;
+  out: number;
+  cr: number;
+  cw: number;
+  cost: number;
 }
 
 export interface HeatCell {
@@ -37,7 +45,13 @@ export interface HeatCell {
 }
 
 export interface LocalUsageSummary {
+  /** Length of the window these numbers cover, in days. */
+  days: number;
   spend: number;
+  /** Spend in the 30 days before the current window, for the vs-previous delta. */
+  prevSpend: number;
+  prevTokens: number;
+  prevCacheShare: number;
   tokens: number;
   cacheShare: number;
   trend: TrendDay[];
@@ -54,6 +68,13 @@ export interface LocalUsageSummary {
 }
 
 export const TREND_DAYS = 30;
+export const PERIODS = [7, 30, 90] as const;
+export type Period = (typeof PERIODS)[number];
+
+const MODEL_PALETTE = ['#e5805a', '#8c94ff', '#4fd1c5', '#f6c453', '#d68cf0', '#7fb0ff'];
+export const OTHER_HUE = '#6b7280';
+/** Colors for the top models, in rank order, so bars and legend agree. */
+export const modelPalette = (rank: number) => MODEL_PALETTE[rank] ?? OTHER_HUE;
 export const HEAT_WEEKS = 13;
 
 export const rowTokens = (r: LocalUsageRow) => r.in + r.out + r.cr + r.cw;
@@ -63,7 +84,11 @@ export const toDateKey = (d: Date): string =>
 
 const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
 
-const rank = (rows: LocalUsageRow[], by: (r: LocalUsageRow) => string, limit: number): RankedItem[] => {
+const rank = (
+  rows: LocalUsageRow[],
+  by: (r: LocalUsageRow) => string,
+  limit: number
+): RankedItem[] => {
   const map = new Map<string, RankedItem>();
   for (const r of rows) {
     const key = by(r);
@@ -76,19 +101,36 @@ const rank = (rows: LocalUsageRow[], by: (r: LocalUsageRow) => string, limit: nu
 };
 
 /** Turns raw daily rows into everything the dashboard tiles show. `now` is injectable for tests. */
-export const summarizeLocalUsage = (rows: LocalUsageRow[], now: Date = new Date()): LocalUsageSummary => {
+export const summarizeLocalUsage = (
+  rows: LocalUsageRow[],
+  now: Date = new Date(),
+  windowDays: number = TREND_DAYS
+): LocalUsageSummary => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const trendStart = toDateKey(addDays(today, -(TREND_DAYS - 1)));
+  const trendStart = toDateKey(addDays(today, -(windowDays - 1)));
   const recent = rows.filter((r) => r.date >= trendStart);
+  const prevStart = toDateKey(addDays(today, -(2 * windowDays - 1)));
+  const prevRows = rows.filter((r) => r.date >= prevStart && r.date < trendStart);
+  const prevSpend = prevRows.reduce((sum, r) => sum + r.cost, 0);
+  const prevTokens = prevRows.reduce((sum, r) => sum + rowTokens(r), 0);
+  const prevCacheShare = prevTokens > 0 ? prevRows.reduce((sum, r) => sum + r.cr, 0) / prevTokens : 0;
 
   const trendMap = new Map<string, TrendDay>();
-  for (let i = TREND_DAYS - 1; i >= 0; i--) {
+  for (let i = windowDays - 1; i >= 0; i--) {
     const date = toDateKey(addDays(today, -i));
-    trendMap.set(date, { date, claude: 0, codex: 0 });
+    trendMap.set(date, { date, claude: 0, codex: 0, byModel: {}, in: 0, out: 0, cr: 0, cw: 0, cost: 0 });
   }
   for (const r of recent) {
     const day = trendMap.get(r.date);
-    if (day) day[r.src] += rowTokens(r);
+    if (day) {
+      day[r.src] += rowTokens(r);
+      day.in += r.in;
+      day.out += r.out;
+      day.cr += r.cr;
+      day.cw += r.cw;
+      day.cost += r.cost;
+      day.byModel[r.model] = (day.byModel[r.model] ?? 0) + rowTokens(r);
+    }
   }
 
   const perDay = new Map<string, number>();
@@ -105,10 +147,16 @@ export const summarizeLocalUsage = (rows: LocalUsageRow[], now: Date = new Date(
   }
   const peak = Math.max(1, ...days.map((d) => d.tokens));
   const levelOf = (tokens: number): HeatCell['level'] =>
-    tokens <= 0 ? 0 : (Math.min(4, Math.max(1, Math.ceil((tokens / peak) * 4))) as HeatCell['level']);
+    tokens <= 0
+      ? 0
+      : (Math.min(4, Math.max(1, Math.ceil((tokens / peak) * 4))) as HeatCell['level']);
   const heat: HeatCell[][] = [];
   for (let w = 0; w < HEAT_WEEKS; w++) {
-    heat.push(days.slice(w * 7, w * 7 + 7).map((d) => ({ date: d.date, tokens: d.tokens, level: d.future ? 0 : levelOf(d.tokens) })));
+    heat.push(
+      days
+        .slice(w * 7, w * 7 + 7)
+        .map((d) => ({ date: d.date, tokens: d.tokens, level: d.future ? 0 : levelOf(d.tokens) }))
+    );
   }
 
   const heatDays = days.filter((d) => !d.future);
@@ -129,20 +177,32 @@ export const summarizeLocalUsage = (rows: LocalUsageRow[], now: Date = new Date(
   const totalTokens = heatDays.reduce((sum, d) => sum + d.tokens, 0);
 
   return {
+    days: windowDays,
     spend: recent.reduce((sum, r) => sum + r.cost, 0),
+    prevSpend,
+    prevTokens,
+    prevCacheShare,
     tokens,
     cacheShare: tokens > 0 ? cached / tokens : 0,
     trend: [...trendMap.values()],
-    models: rank(recent, (r) => r.model, 4),
+    models: rank(recent, (r) => r.model, 5),
     projects: rank(recent, (r) => r.project, 4),
     heat,
     activeDays,
     streak,
     busiest: busiestDay,
     totalTokens,
-    since: rows.length ? rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date) : null,
+    since: rows.length
+      ? rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date)
+      : null,
     coverageDays: rows.length
-      ? Math.round((today.getTime() - new Date(`${rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date)}T00:00:00`).getTime()) / 86_400_000) + 1
+      ? Math.round(
+          (today.getTime() -
+            new Date(
+              `${rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date)}T00:00:00`
+            ).getTime()) /
+            86_400_000
+        ) + 1
       : 0,
   };
 };

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { buildDemoLocalUsage } from '../demoLocalUsage';
-import { summarizeLocalUsage, type LocalUsagePayload, type LocalUsageSummary } from '../localUsageModel';
+import { TREND_DAYS, summarizeLocalUsage, type LocalUsagePayload, type LocalUsageSummary } from '../localUsageModel';
 
 const REFRESH_MS = 5 * 60_000;
 // Same-origin path: `tailscale serve --set-path /local-usage` forwards it to tools/local-usage/server.mjs.
@@ -15,7 +15,7 @@ export interface UseLocalUsageReturn {
   refresh: () => Promise<void>;
 }
 
-export function useLocalUsage(): UseLocalUsageReturn {
+export function useLocalUsage(days: number = TREND_DAYS): UseLocalUsageReturn {
   const demoPayload = useMemo(() => (__DEMO_SITE__ ? buildDemoLocalUsage() : undefined), []);
   const [payload, setPayload] = useState<LocalUsagePayload | null>(demoPayload ?? null);
   const [loading, setLoading] = useState(!demoPayload);
@@ -44,6 +44,6 @@ export function useLocalUsage(): UseLocalUsageReturn {
     return () => window.clearInterval(id);
   }, [refresh]);
 
-  const summary = useMemo(() => (payload ? summarizeLocalUsage(payload.rows) : null), [payload]);
+  const summary = useMemo(() => (payload ? summarizeLocalUsage(payload.rows, new Date(), days) : null), [payload, days]);
   return { summary, loading, available, generatedAt: payload?.generatedAt ?? null, refresh };
 }

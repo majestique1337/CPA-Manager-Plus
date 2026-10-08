@@ -88,7 +88,7 @@
 }
 
 .rowSpend {
-  grid-template-columns: minmax(260px, 1fr) minmax(0, 2fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .rowRanks {
@@ -127,4 +127,29 @@
 
 @media (prefers-reduced-motion: reduce) {
   .dot[data-state='connecting'] { animation: none; }
+}
+
+.periods {
+  display: flex;
+  gap: 2px;
+  align-self: flex-end;
+  padding: 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: -4px;
+
+  button {
+    padding: 3px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+
+    &[data-active='true'] {
+      background: var(--bg-secondary, rgba(255, 255, 255, 0.08));
+      color: var(--text-primary);
+    }
+  }
 }

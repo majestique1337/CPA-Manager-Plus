@@ -346,15 +346,15 @@ export const formatResetIn = (resetAtMs: number | null, nowMs: number): string =
   if (resetAtMs === null) return '—';
   const diff = resetAtMs - nowMs;
   if (diff <= 0) return 'now';
-  const minutes = Math.round(diff / 60_000);
+  const minutes = Math.max(1, Math.floor(diff / 60_000));
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(diff / HOUR_MS);
   if (hours < 48) {
-    const restMinutes = Math.round((diff - hours * HOUR_MS) / 60_000);
+    const restMinutes = Math.floor((diff - hours * HOUR_MS) / 60_000);
     return restMinutes > 0 && hours < 10 ? `${hours}h ${restMinutes}m` : `${hours}h`;
   }
   const days = Math.floor(diff / DAY_MS);
-  const restHours = Math.round((diff - days * DAY_MS) / HOUR_MS);
+  const restHours = Math.floor((diff - days * DAY_MS) / HOUR_MS);
   return restHours > 0 && days < 7 ? `${days}d ${restHours}h` : `${days}d`;
 };
 

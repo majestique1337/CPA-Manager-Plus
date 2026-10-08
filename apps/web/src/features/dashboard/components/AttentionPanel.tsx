@@ -1,12 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import type { DashboardSummaryResponse } from '@/services/api/usageService';
-import { PROVIDER_LABEL, formatResetIn, pickDisplayWindows, type QuotaAccountView } from '../quotaModel';
+import {
+  PROVIDER_LABEL,
+  formatResetIn,
+  pickDisplayWindows,
+  type QuotaAccountView,
+} from '../quotaModel';
 import styles from './Panels.module.scss';
 
 interface AttentionPanelProps {
   accounts: QuotaAccountView[];
   failures: DashboardSummaryResponse['recent_failures'];
   nowMs: number;
+  /** Normalized routing strategy, e.g. 'fill-first'. */
+  routing?: string;
 }
 
 const ago = (ms: number, nowMs: number) => {
@@ -25,10 +32,28 @@ interface Item {
 }
 
 /** Only renders when something is actually wrong, so a quiet dashboard stays quiet. */
-export function AttentionPanel({ accounts, failures, nowMs }: AttentionPanelProps) {
+export function AttentionPanel({ accounts, failures, nowMs, routing }: AttentionPanelProps) {
   const { t } = useTranslation();
 
+  // fill-first keeps sending traffic to the first account, so an exhausted one makes requests fail.
+  const exhausted = accounts.find(
+    (a) =>
+      a.status === 'ready' &&
+      pickDisplayWindows(a).some((w) => w.usedPercent !== null && w.usedPercent >= 99.5)
+  );
+  const routingItems: Item[] =
+    routing === 'fill-first' && exhausted
+      ? [
+          {
+            key: 'routing:fill-first',
+            title: 'Routing is fill-first',
+            detail: `${exhausted.name} is out of quota and may keep receiving requests. Switch to round robin in Config Panel.`,
+          },
+        ]
+      : [];
+
   const items: Item[] = [
+    ...routingItems,
     ...accounts
       .filter((account) => account.status === 'error')
       .map((account) => ({
