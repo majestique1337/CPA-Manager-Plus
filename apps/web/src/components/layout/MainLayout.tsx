@@ -50,7 +50,6 @@ import {
   type PluginResourceEntry,
 } from '@/features/plugins/pluginResources';
 import { triggerHeaderRefresh } from '@/hooks/useHeaderRefresh';
-import { usePanelFeatureAvailability } from '@/hooks/usePanelFeatureAvailability';
 import { getDemoLogoutPath, prefixRouteBase, stripRouteBase } from '@/features/demo/demoMode';
 import { LANGUAGE_LABEL_KEYS, LANGUAGE_ORDER, STORAGE_KEY_SIDEBAR } from '@/utils/constants';
 import { isSupportedLanguage } from '@/utils/language';
@@ -244,7 +243,6 @@ function MainLayoutContent({ routeBase = '', demoMode = false }: MainLayoutProps
   const config = useConfigStore((state) => state.config);
   const fetchConfig = useConfigStore((state) => state.fetchConfig);
   const clearCache = useConfigStore((state) => state.clearCache);
-  const featureAvailability = usePanelFeatureAvailability();
 
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
@@ -516,35 +514,6 @@ function MainLayoutContent({ routeBase = '', demoMode = false }: MainLayoutProps
     shortLabel: navShortLabel('nav.dashboard', t('nav.dashboard')),
     icon: sidebarIcons.dashboard,
   };
-  const usageAnalyticsNavItem = featureAvailability.requestMonitoringAvailable
-    ? {
-        path: '/usage-analytics',
-        label: t('nav.usage_analytics'),
-        shortLabel: navShortLabel('nav.usage_analytics', t('nav.usage_analytics')),
-        icon: sidebarIcons.usageAnalytics,
-      }
-    : null;
-  const monitoringNavItem = featureAvailability.requestMonitoringAvailable
-    ? {
-        path: '/monitoring',
-        label: t('nav.monitoring_center'),
-        shortLabel: navShortLabel('nav.monitoring_center', t('nav.monitoring_center')),
-        icon: sidebarIcons.monitoring,
-      }
-    : null;
-  const usageMaintenanceNavItem: NavItem | null =
-    featureAvailability.panelHostMode === 'manager_embedded' &&
-    featureAvailability.managerServiceAvailable
-      ? {
-          path: '/usage-maintenance',
-          label: t('nav.usage_maintenance', { defaultValue: 'Usage Maintenance' }),
-          shortLabel: navShortLabel(
-            'nav.usage_maintenance',
-            t('nav.usage_maintenance', { defaultValue: 'Maintenance' })
-          ),
-          icon: sidebarIcons.system,
-        }
-      : null;
   const operationNavItems: NavItem[] = [
     {
       path: '/logs',
@@ -574,9 +543,6 @@ function MainLayoutContent({ routeBase = '', demoMode = false }: MainLayoutProps
   const navSections: NavItem[][] = [
     [
       dashboardNavItem,
-      ...(usageAnalyticsNavItem ? [usageAnalyticsNavItem] : []),
-      ...(monitoringNavItem ? [monitoringNavItem] : []),
-      ...(usageMaintenanceNavItem ? [usageMaintenanceNavItem] : []),
     ],
     [
       {

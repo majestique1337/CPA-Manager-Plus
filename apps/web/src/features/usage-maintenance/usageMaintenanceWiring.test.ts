@@ -53,22 +53,8 @@ describe('usage maintenance app wiring', () => {
     expect(routeSource).toContain('<UsageMaintenancePage />');
   });
 
-  it('only exposes the sidebar entry for an available Manager Embedded service', () => {
-    const itemStart = layoutSource.indexOf('const usageMaintenanceNavItem');
-    const itemEnd = layoutSource.indexOf('const operationNavItems');
-    const itemSource = layoutSource.slice(itemStart, itemEnd);
-    const monitoringIndex = layoutSource.indexOf(
-      '...(monitoringNavItem ? [monitoringNavItem] : [])'
-    );
-    const maintenanceIndex = layoutSource.indexOf(
-      '...(usageMaintenanceNavItem ? [usageMaintenanceNavItem] : [])'
-    );
-
-    expect(itemStart).toBeGreaterThanOrEqual(0);
-    expect(itemSource).toContain("featureAvailability.panelHostMode === 'manager_embedded'");
-    expect(itemSource).toContain('featureAvailability.managerServiceAvailable');
-    expect(itemSource).toContain("path: '/usage-maintenance'");
-    expect(maintenanceIndex).toBeGreaterThan(monitoringIndex);
+  it('keeps the sidebar entry hidden (route stays reachable)', () => {
+    expect(layoutSource).not.toContain("path: '/usage-maintenance'");
   });
 
   it('keeps all supported locales aligned', () => {
