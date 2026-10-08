@@ -109,11 +109,7 @@ describe('normalizeCodexResetCreditsPayload', () => {
     });
   });
 
-      expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
-    expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
-    expect(merged.resetCreditsDetailStale).toBe(true);
-    expect(shouldAutoFetchCodexResetCreditDetails(merged)).toBe(true);
-it('Test 3: marks payload with invalid credits type and missing available_count as invalid', () => {
+  it('Test 3: marks payload with invalid credits type and missing available_count as invalid', () => {
     const result = normalizeCodexResetCreditsPayload({ credits: 'invalid' });
     expect(result).toEqual({
       availableCount: null,
