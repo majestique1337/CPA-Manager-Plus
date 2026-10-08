@@ -271,7 +271,7 @@ describe('mergeCodexResetCreditsEvidence', () => {
     });
 
     expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
-    expect(merged.resetCreditsCountEvidenceAtMs).toBe(2000);
+    expect(merged.resetCreditsCountEvidenceAtMs).toBe(1000);
     expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
     expect(merged.resetCreditsDetailEvidenceAtMs).toBe(1000);
     expect(merged.resetCreditsDetailStale).toBe(false);

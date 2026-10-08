@@ -5702,7 +5702,9 @@ export function AccountsPage() {
         await loadCodexResetCreditDetails(row);
       }
     };
-    void check();
+    // Delay initial discovery; page entry must not make unsolicited account
+    // requests or race manual refresh/OAuth reconciliation. Subsequent visible
+    // account discovery remains bounded to a five-minute cadence.
     const interval = setInterval(() => { void check(); }, 5 * 60_000);
     return () => { cancelled = true; clearInterval(interval); };
   }, [activeView, pageRows, getDisplayCodexResetEvidenceQuota, loadCodexResetCreditDetails]);
@@ -6443,6 +6445,16 @@ export function AccountsPage() {
       };
       switch (row.provider) {
         case CODEX_CONFIG.type: {
+          if (mode === 'detail') {
+            // A complete refresh includes a dedicated reset-credit observation,
+            // superseding any earlier standalone detail fetch for this credential.
+            const key = CODEX_CONFIG.getStoreKey?.(row.raw) ?? row.fileName;
+            beginAccountQuotaRequest(
+              quotaRequestVersionsRef.current,
+              `${CODEX_CONFIG.type}:reset-credits:${key}`
+            );
+            codexResetCreditDetailRequestsRef.current.delete(key);
+          }
           const config = mode === 'detail' ? CODEX_CONFIG : CODEX_SUMMARY_CONFIG;
           const result = await refreshWithConfig(
             config,
