@@ -258,7 +258,18 @@ export const mergeCodexResetCreditsFromQuotaSnapshots = (
     quota?.rateLimitResetCreditsAvailableCount === 0 &&
     localCountEvidenceAtMs >= creditsObservedAt;
 
+  // A later count-only snapshot is not proof that the dedicated credit inventory
+  // changed. Keep the verified inventory until a newer full-detail snapshot arrives.
+  const snapshotCountConflictsWithVerifiedDetail =
+    countSnapshot !== undefined &&
+    (hasLocalDetailEvidence ||
+      (hasLocalCountEvidence && quota?.resetCreditsCountSource === 'dedicated')) &&
+    quota?.rateLimitResetCreditsAvailableCount !== null &&
+    quota?.rateLimitResetCreditsAvailableCount !== undefined &&
+    countSnapshot.reset_credits_available !== quota.rateLimitResetCreditsAvailableCount &&
+    !(creditsSnapshot && creditsObservedAt >= countObservedAt);
   const useSnapshotCount =
+    !snapshotCountConflictsWithVerifiedDetail &&
     countSnapshot !== undefined &&
     ((quota?.rateLimitResetCreditsAvailableCount === undefined ||
       quota?.rateLimitResetCreditsAvailableCount === null) &&
@@ -326,6 +337,7 @@ export const mergeCodexResetCreditsFromQuotaSnapshots = (
   const next: CodexQuotaState = {
     ...base,
     rateLimitResetCreditsAvailableCount: finalCount,
+    resetCreditsCountSource: useSnapshotCredits ? 'dedicated' : quota?.resetCreditsCountSource ?? 'summary',
     rateLimitResetCredits: finalCredits,
     resetCreditsCountEvidenceAtMs: finalCountEvidenceAtMs > 0 ? finalCountEvidenceAtMs : null,
     resetCreditsDetailEvidenceAtMs: finalDetailEvidenceAtMs,

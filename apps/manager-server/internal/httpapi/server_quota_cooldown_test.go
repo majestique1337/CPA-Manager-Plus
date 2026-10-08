@@ -104,3 +104,41 @@ func containsInternalField(body string) bool {
 	}
 	return false
 }
+
+
+// Stub keeps the HTTP contract independent of the actual CPA worker.
+type quotaRecoveryStub struct {
+	name  string
+	index string
+}
+
+func (s *quotaRecoveryStub) RecoverCodexAfterReset(_ context.Context, name, index string) (bool, error) {
+	s.name, s.index = name, index
+	return true, nil
+}
+
+func TestQuotaCooldownRecoverRequiresAuthAndDelegates(t *testing.T) {
+	cfg := testutil.NewConfig(t)
+	db := testutil.NewStore(t, cfg)
+	manager := collector.NewManager(cfg, db)
+	app := New(cfg, db, manager)
+	stub := &quotaRecoveryStub{}
+	app.AppContext().QuotaCooldownRecoveryService = stub
+	handler := app.Handler()
+	body := `{"authFileName":"codex.json","authIndex":"auth-1"}`
+	unauth := testutil.Request(t, handler, http.MethodPost, "/usage-service/quota-cooldowns/recover", body, "")
+	if unauth.Code == http.StatusOK {
+		t.Fatal("unauthenticated early recovery permitted")
+	}
+	invalid := testutil.Request(t, handler, http.MethodPost, "/usage-service/quota-cooldowns/recover", "{}", testutil.AdminKey)
+	testutil.RequireStatus(t, invalid, http.StatusBadRequest)
+	authorized := testutil.Request(t, handler, http.MethodPost, "/usage-service/quota-cooldowns/recover", body, testutil.AdminKey)
+	testutil.RequireStatus(t, authorized, http.StatusOK)
+	var result struct {
+		Recovered bool `json:"recovered"`
+	}
+	testutil.DecodeJSON(t, authorized, &result)
+	if !result.Recovered || stub.name != "codex.json" || stub.index != "auth-1" {
+		t.Fatalf("recovery result=%#v name=%q index=%q", result, stub.name, stub.index)
+	}
+}

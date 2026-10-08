@@ -3130,6 +3130,23 @@ export const usageServiceApi = {
     });
   },
 
+  recoverCodexQuotaCooldown: async (
+    base: string,
+    managementKey: string,
+    authFileName: string,
+    authIndex: string
+  ): Promise<{ recovered: boolean }> => {
+    if (__DEMO_SITE__ && isDemoMode()) return { recovered: false };
+    return withUsageServiceError(async () => {
+      const response = await axios.post<{ recovered: boolean }>(
+        buildUrl(base, '/usage-service/quota-cooldowns/recover'),
+        { authFileName, authIndex },
+        { timeout: USAGE_SERVICE_TIMEOUT_MS, headers: authHeaders(managementKey) }
+      );
+      return response.data;
+    });
+  },
+
   getActiveQuotaCooldowns: async (
     base: string,
     managementKey?: string

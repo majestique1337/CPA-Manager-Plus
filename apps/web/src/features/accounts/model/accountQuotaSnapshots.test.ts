@@ -2101,6 +2101,61 @@ describe('account quota snapshots', () => {
     expect(merged?.rateLimitResetCredits).toEqual([]);
   });
 
+  it('does not let a newer summary zero erase locally verified reset credits', () => {
+    const quota = {
+      status: 'success' as const,
+      windows: [],
+      rateLimitResetCreditsAvailableCount: 2,
+      resetCreditsCountEvidenceAtMs: 10_000,
+      resetCreditsDetailEvidenceAtMs: 10_000,
+      rateLimitResetCredits: [
+        { id: 'A', status: 'available', grantedAt: '', expiresAt: new Date(100_000).toISOString() },
+        { id: 'B', status: 'available', grantedAt: '', expiresAt: new Date(100_000).toISOString() },
+      ],
+    };
+    const merged = mergeCodexResetCreditsFromQuotaSnapshots(quota, [
+      makeSnapshot({ observed_at_ms: 20_000, reset_credits_available: 0,
+        field_sources: { reset_credits_available: { source: 'api_query', observed_at_ms: 20_000 } } }),
+    ]);
+    expect(merged?.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged?.rateLimitResetCredits).toHaveLength(2);
+  });
+
+  it('does not let a count-only snapshot change a verified positive count', () => {
+    const quota = {
+      status: 'success' as const,
+      windows: [],
+      rateLimitResetCreditsAvailableCount: 2,
+      resetCreditsCountEvidenceAtMs: 10_000,
+      resetCreditsDetailEvidenceAtMs: 10_000,
+      rateLimitResetCredits: [
+        { id: 'A', status: 'available', grantedAt: '', expiresAt: new Date(100_000).toISOString() },
+        { id: 'B', status: 'available', grantedAt: '', expiresAt: new Date(100_000).toISOString() },
+      ],
+    };
+    const merged = mergeCodexResetCreditsFromQuotaSnapshots(quota, [
+      makeSnapshot({ observed_at_ms: 20_000, reset_credits_available: 3,
+        field_sources: { reset_credits_available: { source: 'api_query', observed_at_ms: 20_000 } } }),
+    ]);
+    expect(merged?.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged?.rateLimitResetCredits).toHaveLength(2);
+  });
+
+  it('keeps a dedicated count-only zero over a newer conflicting snapshot', () => {
+    const merged = mergeCodexResetCreditsFromQuotaSnapshots({
+      status: 'success',
+      windows: [],
+      rateLimitResetCreditsAvailableCount: 0,
+      resetCreditsCountSource: 'dedicated',
+      resetCreditsCountEvidenceAtMs: 10_000,
+      rateLimitResetCredits: [],
+    }, [
+      makeSnapshot({ observed_at_ms: 20_000, reset_credits_available: 2,
+        field_sources: { reset_credits_available: { source: 'api_query', observed_at_ms: 20_000 } } }),
+    ]);
+    expect(merged?.rateLimitResetCreditsAvailableCount).toBe(0);
+  });
+
   it('uses a deterministic tie-break for snapshots observed at the same time', () => {
     const snapshots = [
       makeSnapshot({

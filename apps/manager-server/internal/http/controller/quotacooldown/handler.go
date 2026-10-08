@@ -2,6 +2,7 @@ package quotacooldown
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -48,6 +49,10 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	path := strings.TrimRight(r.URL.Path, "/")
+	if path == "/usage-service/quota-cooldowns/recover" {
+		h.recoverAfterReset(w, r)
+		return
+	}
 	if path != "/usage-service/quota-cooldowns" {
 		response.MethodNotAllowed(w)
 		return
@@ -71,6 +76,46 @@ func (h *Handler) Handle(w http.ResponseWriter, r *http.Request) {
 		items = append(items, mapCooldown(c))
 	}
 	response.JSON(w, http.StatusOK, listResponse{Items: items})
+}
+
+type recoverAfterResetRequest struct {
+	AuthFileName string `json:"authFileName"`
+	AuthIndex string `json:"authIndex"`
+}
+
+// recoverAfterReset runs only for an authenticated administrator. The worker
+// independently checks CPAMP ownership and verified CPA credential identity.
+func (h *Handler) recoverAfterReset(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		response.MethodNotAllowed(w)
+		return
+	}
+	if !middleware.AuthorizePanel(w, r, h.App.AdminAuthService) {
+		return
+	}
+	if h.App.QuotaCooldownRecoveryService == nil {
+		response.Error(w, http.StatusServiceUnavailable, errors.New("quota recovery unavailable"))
+		return
+	}
+	var input recoverAfterResetRequest
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 4096))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&input); err != nil {
+		response.Error(w, http.StatusBadRequest, err)
+		return
+	}
+	if strings.TrimSpace(input.AuthFileName) == "" || strings.TrimSpace(input.AuthIndex) == "" {
+		response.Error(w, http.StatusBadRequest, errors.New("credential identity required"))
+		return
+	}
+	recovered, err := h.App.QuotaCooldownRecoveryService.RecoverCodexAfterReset(
+		r.Context(), input.AuthFileName, input.AuthIndex,
+	)
+	if err != nil {
+		response.Error(w, http.StatusConflict, err)
+		return
+	}
+	response.JSON(w, http.StatusOK, map[string]bool{"recovered": recovered})
 }
 
 func mapCooldown(c model.QuotaCooldown) cooldownItem {

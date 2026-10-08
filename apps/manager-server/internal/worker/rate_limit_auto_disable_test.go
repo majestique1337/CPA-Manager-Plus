@@ -2717,3 +2717,91 @@ func (r *failMarkRecoveredQuotaCooldownRepository) MarkRecovered(ctx context.Con
 	}
 	return r.Repository.MarkRecovered(ctx, id, recoveredAtMS)
 }
+
+
+func TestRecoverCodexAfterResetSkipsPreDisabledAndWrongIdentity(t *testing.T) {
+	st, err := store.Open(filepath.Join(t.TempDir(), "usage.sqlite"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer st.Close()
+	ctx := context.Background()
+	_, err = st.UpsertQuotaCooldown(ctx, store.QuotaCooldownUpsert{
+		AuthFileName: "manual.json", AuthIndex: "auth-1", Provider: "codex",
+		Owner: model.QuotaCooldownOwnerUsage429, PreDisabledState: true,
+		RecoverAtMS:  time.Now().Add(time.Hour).UnixMilli(),
+		DisabledAtMS: time.Now().UnixMilli(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	worker := NewRateLimitAutoDisableWorker(st)
+	for _, tc := range []struct{ name, index string }{
+		{"other.json", "auth-1"}, {"manual.json", "other-index"}, {"manual.json", "auth-1"},
+	} {
+		recovered, err := worker.RecoverCodexAfterReset(ctx, tc.name, tc.index)
+		if err != nil || recovered {
+			t.Fatalf("unexpected recovery for %q/%q: recovered=%v err=%v", tc.name, tc.index, recovered, err)
+		}
+	}
+	active, err := st.QuotaCooldowns.ListActive(ctx)
+	if err != nil || len(active) != 1 {
+		t.Fatalf("manual cooldown changed: %#v %v", active, err)
+	}
+}
+
+func TestRecoverCodexAfterResetEnablesOnlyOwnedCooldown(t *testing.T) {
+	st, err := store.Open(filepath.Join(t.TempDir(), "usage.sqlite"))
+	if err != nil {
+		t.Fatalf("open store: %v", err)
+	}
+	defer st.Close()
+	disabled, patchCalls := true, 0
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method + " " + r.URL.Path {
+		case "GET /v0/management/auth-files":
+			_ = json.NewEncoder(w).Encode([]map[string]any{{
+				"id": "runtime-alice", "name": "codex-auth.json", "auth_index": "auth-1",
+				"provider": "codex", "account": "alice@example.com",
+				"account_id": "workspace-1", "disabled": disabled,
+			}})
+		case "PATCH /v0/management/auth-files/status":
+			var payload struct {
+				Disabled bool `json:"disabled"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			disabled = payload.Disabled
+			patchCalls++
+			_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	ctx := context.Background()
+	if _, err := st.UpsertQuotaCooldown(ctx, store.QuotaCooldownUpsert{
+		AuthFileName: "codex-auth.json", AuthIndex: "auth-1", Provider: "codex",
+		Owner:        model.QuotaCooldownOwnerUsage429,
+		RecoverAtMS:  time.Now().Add(time.Hour).UnixMilli(),
+		DisabledAtMS: time.Now().Add(-time.Hour).UnixMilli(),
+	}); err != nil {
+		t.Fatal(err)
+	}
+	worker := NewRateLimitAutoDisableWorker(st, collectorpkg.RuntimeConfig{
+		CPAUpstreamURL: server.URL, ManagementKey: "mgmt",
+	})
+	recovered, err := worker.RecoverCodexAfterReset(ctx, "codex-auth.json", "auth-1")
+	if err != nil || !recovered {
+		t.Fatalf("recovered=%v err=%v", recovered, err)
+	}
+	if disabled || patchCalls != 1 {
+		t.Fatalf("disabled=%v patches=%d", disabled, patchCalls)
+	}
+	active, err := st.QuotaCooldowns.ListActive(ctx)
+	if err != nil || len(active) != 0 {
+		t.Fatalf("active=%#v err=%v", active, err)
+	}
+}

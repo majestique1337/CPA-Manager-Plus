@@ -36,6 +36,12 @@ type AutomationRuntimeService interface {
 	Reload(ctx context.Context) error
 }
 
+// QuotaCooldownRecoveryService is implemented by the worker; the HTTP layer
+// cannot directly patch native CPA disabled state.
+type QuotaCooldownRecoveryService interface {
+	RecoverCodexAfterReset(ctx context.Context, authFileName string, authIndex string) (bool, error)
+}
+
 type DatabaseMaintenanceStatusProvider interface {
 	Snapshot() sqliterepo.WALMaintenanceSnapshot
 }
@@ -67,6 +73,7 @@ type Context struct {
 	ProxyService                   *proxysvc.Service
 	PanelService                   *panelsvc.Service
 	AutomationRuntimeService       AutomationRuntimeService
+	QuotaCooldownRecoveryService   QuotaCooldownRecoveryService
 	DatabaseMaintenance            DatabaseMaintenanceStatusProvider
 }
 

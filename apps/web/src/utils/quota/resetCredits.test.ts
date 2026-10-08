@@ -109,7 +109,11 @@ describe('normalizeCodexResetCreditsPayload', () => {
     });
   });
 
-  it('Test 3: marks payload with invalid credits type and missing available_count as invalid', () => {
+      expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
+    expect(merged.resetCreditsDetailStale).toBe(true);
+    expect(shouldAutoFetchCodexResetCreditDetails(merged)).toBe(true);
+it('Test 3: marks payload with invalid credits type and missing available_count as invalid', () => {
     const result = normalizeCodexResetCreditsPayload({ credits: 'invalid' });
     expect(result).toEqual({
       availableCount: null,
@@ -277,7 +281,7 @@ describe('mergeCodexResetCreditsEvidence', () => {
     expect(merged.resetCreditsDetailStale).toBe(false);
   });
 
-  it('Test 3: marks detail stale and clears display credits when summary count changes', () => {
+  it('Test 3: preserves verified detail pending dedicated confirmation when summary count changes', () => {
     const previous = {
       rateLimitResetCreditsAvailableCount: 2,
       rateLimitResetCredits: [creditA, creditB],
@@ -295,15 +299,14 @@ describe('mergeCodexResetCreditsEvidence', () => {
       isFullDetailObservation: false,
     });
 
-    expect(merged.rateLimitResetCreditsAvailableCount).toBe(1);
-    expect(merged.resetCreditsCountEvidenceAtMs).toBe(2000);
-    expect(merged.rateLimitResetCredits).toEqual([]);
+    expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged.resetCreditsCountEvidenceAtMs).toBe(1000);
+    expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
     expect(merged.resetCreditsDetailStale).toBe(true);
-    // Detail evidence timestamp is retained as historical metadata without being advanced
     expect(merged.resetCreditsDetailEvidenceAtMs).toBe(1000);
   });
 
-  it('Test 4: sets count=0, clears credits, marks detailStale=false on summary count -> 0', () => {
+  it('Test 4: preserves verified credits and flags a conflicting summary zero', () => {
     const previous = {
       rateLimitResetCreditsAvailableCount: 2,
       rateLimitResetCredits: [creditA, creditB],
@@ -320,10 +323,51 @@ describe('mergeCodexResetCreditsEvidence', () => {
       isFullDetailObservation: false,
     });
 
+    expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
+    expect(merged.resetCreditsDetailEvidenceAtMs).toBe(1000);
+    expect(merged.resetCreditsDetailStale).toBe(true);
+    expect(shouldAutoFetchCodexResetCreditDetails(merged)).toBe(true);
+  });
+
+  it('preserves verified credits if full refresh falls back to a summary zero after detail failure', () => {
+    const previous = {
+      rateLimitResetCreditsAvailableCount: 2,
+      rateLimitResetCredits: [creditA, creditB],
+      resetCreditsCountEvidenceAtMs: 1000,
+      resetCreditsDetailEvidenceAtMs: 1000,
+    };
+    const merged = mergeCodexResetCreditsEvidence(previous, {
+      rateLimitResetCreditsAvailableCount: 0,
+      rateLimitResetCredits: [],
+      rateLimitResetCreditsError: '502 Bad Gateway',
+      resetCreditsCountEvidenceAtMs: 2000,
+      resetCreditsDetailEvidenceAtMs: null,
+      observedAtMs: 2000,
+    });
+    expect(merged.rateLimitResetCreditsAvailableCount).toBe(2);
+    expect(merged.rateLimitResetCredits).toEqual([creditA, creditB]);
+    expect(merged.resetCreditsDetailStale).toBe(true);
+    expect(merged.rateLimitResetCreditsError).toBe('502 Bad Gateway');
+  });
+
+  it('accepts a count-only dedicated zero even when a prior full detail had positive credits', () => {
+    const previous = {
+      rateLimitResetCreditsAvailableCount: 2,
+      rateLimitResetCredits: [creditA, creditB],
+      resetCreditsCountSource: 'dedicated' as const,
+      resetCreditsCountEvidenceAtMs: 1000,
+      resetCreditsDetailEvidenceAtMs: 1000,
+    };
+    const merged = mergeCodexResetCreditsEvidence(previous, {
+      rateLimitResetCreditsAvailableCount: 0,
+      resetCreditsCountSource: 'dedicated',
+      resetCreditsCountEvidenceAtMs: 2000,
+      observedAtMs: 2000,
+    }, { isFullDetailObservation: false });
     expect(merged.rateLimitResetCreditsAvailableCount).toBe(0);
-    expect(merged.resetCreditsCountEvidenceAtMs).toBe(2000);
     expect(merged.rateLimitResetCredits).toEqual([]);
-    expect(merged.resetCreditsDetailEvidenceAtMs).toBeNull();
+    expect(merged.resetCreditsCountSource).toBe('dedicated');
     expect(merged.resetCreditsDetailStale).toBe(false);
   });
 

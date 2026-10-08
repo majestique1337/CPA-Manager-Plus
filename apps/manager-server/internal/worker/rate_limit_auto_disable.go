@@ -581,6 +581,71 @@ func fillMissingXAIProviderUsageEvidence(target *usage.ProviderUsageMetadata, so
 	}
 }
 
+// RecoverCodexAfterReset runs the existing ownership-aware recovery path early
+// after a verified Codex banked reset. It never enables unrelated or pre-disabled credentials.
+func (w *RateLimitAutoDisableWorker) RecoverCodexAfterReset(ctx context.Context, name, authIndex string) (bool, error) {
+	if w == nil || w.store == nil || w.store.QuotaCooldowns == nil {
+		return false, fmt.Errorf("quota recovery unavailable")
+	}
+	name, authIndex = strings.TrimSpace(name), strings.TrimSpace(authIndex)
+	if name == "" || authIndex == "" {
+		return false, fmt.Errorf("credential identity required")
+	}
+	w.operationMu.Lock()
+	defer w.operationMu.Unlock()
+	active, err := w.store.QuotaCooldowns.ListActive(ctx)
+	if err != nil {
+		return false, err
+	}
+	var matched *store.QuotaCooldown
+	for i := range active {
+		item := &active[i]
+		if item.AuthFileName != name || item.AuthIndex != authIndex || normalizeQuotaProvider(item.Provider) != "codex" {
+			continue
+		}
+		if item.Owner != model.QuotaCooldownOwnerUsage429 || item.PreDisabledState {
+			return false, nil
+		}
+		if matched != nil {
+			return false, fmt.Errorf("ambiguous credential cooldown ownership")
+		}
+		matched = item
+	}
+	if matched == nil {
+		return false, nil
+	}
+	baseURL, managementKey := w.runtimeConfig()
+	if baseURL == "" || managementKey == "" {
+		return false, fmt.Errorf("CPA runtime unavailable")
+	}
+	if !w.recoverCooldown(ctx, baseURL, managementKey, *matched, time.Now()) {
+		return false, fmt.Errorf("quota cooldown recovery not completed")
+	}
+	remaining, err := w.store.QuotaCooldowns.ListActive(ctx)
+	if err != nil {
+		return false, err
+	}
+	for _, item := range remaining {
+		if item.ID == matched.ID {
+			return false, fmt.Errorf("quota cooldown recovery not completed")
+		}
+	}
+	// An identity mismatch may have marked the cooldown skipped. Independently
+	// verify the credential is still the target and is actually enabled.
+	target, ok, err := w.currentAuthFileTarget(ctx, baseURL, managementKey, cpaauthfiles.Identity{
+		AuthFileName: matched.AuthFileName,
+		AuthIndex:    matched.AuthIndex,
+		Provider:     "codex",
+	})
+	if err != nil {
+		return false, err
+	}
+	if !ok || target.File.Disabled {
+		return false, fmt.Errorf("credential remains disabled after recovery")
+	}
+	return true, nil
+}
+
 func (w *RateLimitAutoDisableWorker) enableDue(ctx context.Context, now time.Time) {
 	if w == nil {
 		return
@@ -608,18 +673,18 @@ func (w *RateLimitAutoDisableWorker) enableDueLocked(ctx context.Context, now ti
 	}
 }
 
-func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseURL string, managementKey string, item store.QuotaCooldown, now time.Time) {
+func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseURL string, managementKey string, item store.QuotaCooldown, now time.Time) bool {
 	if item.Owner != model.QuotaCooldownOwnerUsage429 && item.Owner != model.QuotaCooldownOwnerXAIFreeUsage {
 		reason := "unknown owner"
 		_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 		log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s owner=%q", item.ID, item.AuthFileName, reason, item.Owner)
-		return
+		return false
 	}
 	if item.PreDisabledState {
 		reason := "pre-disabled before CPAMP action"
 		_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 		log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s", item.ID, item.AuthFileName, reason)
-		return
+		return false
 	}
 	authIndex := strings.TrimSpace(item.AuthIndex)
 	accountSnapshot := quotaActionAccountSnapshot(item.AuthFileName, item.AccountSnapshot)
@@ -641,7 +706,7 @@ func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseUR
 			reason := "Codex cooldown has conflicting workspace/member evidence"
 			_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 			log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s", item.ID, item.AuthFileName, reason)
-			return
+			return false
 		}
 		if identityPresent && accountSnapshot == "" {
 			accountSnapshot = member
@@ -651,23 +716,23 @@ func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseUR
 		reason := "Codex cooldown has no auth index; credential locator is not recoverable"
 		_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 		log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s", item.ID, item.AuthFileName, reason)
-		return
+		return false
 	}
 	if authIndex == "" && !hasQuotaFallbackIdentity(provider, accountSnapshot) {
 		reason := "cooldown identity has no stable auth index or provider/account snapshot identity"
 		_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 		log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s", item.ID, item.AuthFileName, reason)
-		return
+		return false
 	}
 	if w.authFileMutations == nil {
 		_ = w.store.RecordQuotaCooldownFailure(ctx, item.ID, cpaauthfiles.ErrMutationCoordinatorUnavailable.Error())
-		return
+		return false
 	}
 	releaseMutation, err := w.authFileMutations.Acquire(ctx, item.AuthFileName)
 	if err != nil {
 		_ = w.store.RecordQuotaCooldownFailure(ctx, item.ID, err.Error())
 		log.Printf("[quota-auto-disable] failed to coordinate auth file %q recovery: %v", item.AuthFileName, err)
-		return
+		return false
 	}
 	defer releaseMutation()
 	target, ok, err := w.currentAuthFileTarget(ctx, baseURL, managementKey, cpaauthfiles.Identity{
@@ -682,32 +747,32 @@ func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseUR
 			reason := "auth file identity changed before cooldown recovery"
 			_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, reason)
 			log.Printf("[quota-auto-disable] skip cooldown recovery id=%d authFile=%q reason=%s: %v", item.ID, item.AuthFileName, reason, err)
-			return
+			return false
 		}
 		_ = w.store.RecordQuotaCooldownFailure(ctx, item.ID, err.Error())
 		log.Printf("[quota-auto-disable] failed to verify auth file %q before recovery: %v", item.AuthFileName, err)
-		return
+		return false
 	}
 	if !ok {
 		_ = w.store.MarkQuotaCooldownSkipped(ctx, item.ID, "auth file missing or auth index mismatch")
 		log.Printf("[quota-auto-disable] auth file %q authIndex=%q missing/mismatched, skip auto-enable", item.AuthFileName, item.AuthIndex)
-		return
+		return false
 	}
 	if !target.File.Disabled {
 		if err := w.store.MarkQuotaCooldownRecovered(ctx, item.ID, now.UnixMilli()); err != nil {
 			_ = w.store.RecordQuotaCooldownFailure(ctx, item.ID, fmt.Sprintf("mark already-enabled cooldown recovered: %v", err))
 			log.Printf("[quota-auto-disable] auth file %q is enabled but failed to mark cooldown recovered: %v", item.AuthFileName, err)
-			return
+			return false
 		}
 		log.Printf("[quota-auto-disable] auth file %q already enabled; marked cooldown recovered", item.AuthFileName)
-		return
+		return true
 	}
 
 	log.Printf("[quota-auto-disable] reset time reached for auth file %q account=%q, enabling", item.AuthFileName, item.AccountSnapshot)
 	if err := w.patchAuthFileTarget(ctx, baseURL, managementKey, target, false); err != nil {
 		_ = w.store.RecordQuotaCooldownFailure(ctx, item.ID, err.Error())
 		log.Printf("[quota-auto-disable] failed to enable auth file %q: %v", item.AuthFileName, err)
-		return
+		return false
 	}
 	if err := w.store.MarkQuotaCooldownRecovered(ctx, item.ID, now.UnixMilli()); err != nil {
 		rollbackCtx, cancelRollback := detachedAuthFileMutationContext(ctx, w.compensationTimeout)
@@ -735,9 +800,10 @@ func (w *RateLimitAutoDisableWorker) recoverCooldown(ctx context.Context, baseUR
 		}
 		_ = w.store.RecordQuotaCooldownFailure(rollbackCtx, item.ID, reason)
 		log.Printf("[quota-auto-disable] enabled auth file %q but failed to mark cooldown recovered; rollbackErr=%v: %v", item.AuthFileName, rollbackErr, err)
-		return
+		return false
 	}
 	log.Printf("[quota-auto-disable] enabled auth file %q after quota cooldown", item.AuthFileName)
+	return true
 }
 
 func quotaAutoDisableCandidateFromEvent(event usage.Event, baseURL string, managementKey string, now time.Time) (quotaAutoDisableCandidate, bool) {
