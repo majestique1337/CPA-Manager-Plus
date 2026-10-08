@@ -85,7 +85,7 @@ export function DashboardPage() {
           <div className={styles.periods} role="group" aria-label="Period">
             {PERIODS.map((d) => (
               <button key={d} type="button" data-active={d === period} onClick={() => setPeriod(d)}>
-                {d}d
+                {d === 1 ? 'Today' : `${d}d`}
               </button>
             ))}
           </div>

@@ -68,7 +68,7 @@ export interface LocalUsageSummary {
 }
 
 export const TREND_DAYS = 30;
-export const PERIODS = [7, 30, 90] as const;
+export const PERIODS = [1, 7, 30, 90] as const;
 export type Period = (typeof PERIODS)[number];
 
 const MODEL_PALETTE = ['#e5805a', '#8c94ff', '#4fd1c5', '#f6c453', '#d68cf0', '#7fb0ff'];

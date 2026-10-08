@@ -31,7 +31,7 @@ export function SpendTile({ summary }: { summary: LocalUsageSummary }) {
         <h2>
           {summary.since && summary.coverageDays < summary.days
             ? `Spend since ${shortDate(summary.since)}`
-            : t('dashboard.spend', { defaultValue: `Spend, last ${summary.days} days` })}
+            : t('dashboard.spend', { defaultValue: summary.days === 1 ? 'Spend, today' : `Spend, last ${summary.days} days` })}
         </h2>
       </header>
       <div>
@@ -39,7 +39,7 @@ export function SpendTile({ summary }: { summary: LocalUsageSummary }) {
         {summary.prevSpend > 0 && summary.coverageDays >= 2 * summary.days ? (
           <p className={styles.delta} data-up={summary.spend >= summary.prevSpend}>
             {summary.spend >= summary.prevSpend ? '↑' : '↓'}{' '}
-            {Math.abs(Math.round((summary.spend / summary.prevSpend - 1) * 100))}% vs previous {summary.days} days
+            {Math.abs(Math.round((summary.spend / summary.prevSpend - 1) * 100))}% vs {summary.days === 1 ? 'yesterday' : `previous ${summary.days} days`}
           </p>
         ) : null}
         <p className={styles.spendNote}>
