@@ -1,0 +1,217 @@
+@use '@/styles/mixins' as m;
+
+.providers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+
+.tile {
+  --hue: var(--text-secondary);
+  --label-width: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+
+  &[data-wide] { --label-width: 88px; }
+  &[data-provider='claude'] { --hue: #e5805a; }
+  &[data-provider='codex'] { --hue: #8c94ff; }
+  &[data-provider='antigravity'] { --hue: #4fc3b8; }
+  &[data-provider='kimi'] { --hue: #c79bf2; }
+  &[data-provider='xai'] { --hue: #aeb0ba; }
+}
+
+.tileHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+
+  h2 {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--text-primary);
+  }
+
+  i {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--hue);
+  }
+}
+
+.tileMeta {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
+.account {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+
+  & + & {
+    padding-top: 14px;
+    border-top: 1px solid var(--border-secondary);
+  }
+
+  &[data-status='loading'] .meters { opacity: 0.5; }
+}
+
+.identity {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.plan {
+  flex: none;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.burn {
+  flex: none;
+  margin-left: auto;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hue);
+  background: color-mix(in srgb, var(--hue) 14%, transparent);
+  border-radius: 999px;
+}
+
+.rowMessage {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 200ms ease;
+}
+
+.meter {
+  display: grid;
+  grid-template-columns: var(--label-width) minmax(40px, 1fr) 34px 52px;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.meterLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.meterValue {
+  font-family: ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+
+  &[data-tone='low'] { color: var(--color-warning); }
+  &[data-tone='critical'] { color: var(--color-danger); }
+}
+
+.track {
+  --bar: var(--hue);
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+
+  &[data-tone='low'] { --bar: var(--color-warning); }
+  &[data-tone='critical'] { --bar: var(--color-danger); }
+  &[data-tone='none'] { --bar: var(--text-quaternary); }
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bar);
+  transition: width 500ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+// Where the bar would sit if quota were spent evenly across the window.
+.pace {
+  position: absolute;
+  top: -3px;
+  width: 2px;
+  height: 10px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--text-primary);
+  opacity: 0.6;
+}
+
+.meterReset {
+  font-size: 11.5px;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
+.skeleton {
+  height: 150px;
+  border-radius: 16px;
+  background: linear-gradient(90deg, var(--surface-subtle) 25%, var(--surface-subtle-strong) 50%, var(--surface-subtle) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 24px 4px;
+  font-size: 13px;
+  color: var(--text-tertiary);
+
+  strong {
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+  .fill { transition: none; }
+}

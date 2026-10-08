@@ -1,0 +1,301 @@
+@use '@/styles/mixins' as m;
+
+// Shared tile chrome for the dashboard. Tiles are flat: a hairline, a quiet surface, no shadows.
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px 18px 18px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+}
+
+.tileHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--text-primary);
+  }
+}
+
+.tileMeta {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+}
+
+.numeral {
+  font-family: ui-rounded, 'SF Pro Rounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.quiet {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--text-tertiary);
+}
+
+// ---- Spend -----------------------------------------------------------------
+.spendValue {
+  font-size: 40px;
+  font-weight: 650;
+  line-height: 1;
+  color: var(--text-primary);
+}
+
+.spendNote {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.split {
+  display: flex;
+  height: 4px;
+  gap: 2px;
+  border-radius: 2px;
+  overflow: hidden;
+
+  span {
+    min-width: 2px;
+    border-radius: 2px;
+  }
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: 0;
+
+  dt {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  dd {
+    margin: 2px 0 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary);
+
+  i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin-right: 6px;
+    border-radius: 2px;
+    background: var(--swatch);
+  }
+}
+
+// ---- Trend -----------------------------------------------------------------
+.trend {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 132px;
+}
+
+.trendDay {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1px;
+  height: 100%;
+  min-width: 0;
+  opacity: 0.85;
+
+  &[data-active='true'] { opacity: 1; }
+  &[data-empty='true'] { justify-content: flex-end; }
+
+  span {
+    display: block;
+    min-height: 0;
+    border-radius: 2px;
+    background: var(--swatch);
+  }
+
+  em {
+    display: block;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--app-border-strong);
+  }
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: -6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+// ---- Rankings --------------------------------------------------------------
+.ranks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 52px;
+  align-items: center;
+  gap: 12px;
+  font-size: 12.5px;
+
+  .rankName {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .rankValue {
+    text-align: right;
+    color: var(--text-secondary);
+  }
+}
+
+.rankBar {
+  height: 4px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--swatch, var(--text-secondary));
+  }
+}
+
+// ---- Heatmap ---------------------------------------------------------------
+.heatWrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.heat {
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(7, 11px);
+  grid-auto-columns: 11px;
+  gap: 3px;
+}
+
+.cell {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+
+  &[data-level='1'] { background: color-mix(in srgb, var(--text-primary) 20%, transparent); }
+  &[data-level='2'] { background: color-mix(in srgb, var(--text-primary) 38%, transparent); }
+  &[data-level='3'] { background: color-mix(in srgb, var(--text-primary) 62%, transparent); }
+  &[data-level='4'] { background: var(--text-primary); }
+}
+
+.heatStats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  text-align: right;
+
+  .total {
+    font-size: 26px;
+    font-weight: 650;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: end;
+    gap: 4px 14px;
+    margin: 0;
+    font-size: 12px;
+  }
+
+  dt { color: var(--text-tertiary); }
+  dd { margin: 0; color: var(--text-secondary); }
+}
+
+// ---- Attention -------------------------------------------------------------
+.attention {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: grid;
+    grid-template-columns: 8px minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 10px;
+    padding: 9px 0;
+
+    & + li {
+      border-top: 1px solid var(--border-secondary);
+    }
+  }
+
+  strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+
+  time {
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+}
+
+.attentionDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-warning);
+}

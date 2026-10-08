@@ -279,17 +279,17 @@
 }
 
 [data-theme='dark'] {
-  --app-bg: #0a0a0a;
-  --app-bg-gradient: linear-gradient(120deg, #0b1324 0%, #0a1426 50%, #091521 100%);
+  --app-bg: #000000;
+  --app-bg-gradient: none;
   --app-bg-blob-1-start: #1b2a55;
   --app-bg-blob-1-end: #27325c;
   --app-bg-blob-2-start: #0f3d59;
   --app-bg-blob-2-end: #0c4a4f;
-  --app-bg-blob-1-opacity: 0.35;
-  --app-bg-blob-2-opacity: 0.3;
+  --app-bg-blob-1-opacity: 0;
+  --app-bg-blob-2-opacity: 0;
   --app-bg-blob-blur: 70px;
-  --app-surface: rgba(24, 28, 40, 0.9);
-  --app-surface-strong: #1b1f2a;
+  --app-surface: #0d0d0f;
+  --app-surface-strong: #151518;
   --app-surface-muted: rgba(255, 255, 255, 0.08);
   --app-border: rgba(255, 255, 255, 0.08);
   --app-border-strong: rgba(255, 255, 255, 0.12);
@@ -298,21 +298,21 @@
   --app-text-primary: #e5e5e5;
   --app-text-regular: #a3a3a3;
   --app-text-muted: #7a7a7a;
-  --app-accent-soft: rgba(96, 165, 250, 0.18);
+  --app-accent-soft: rgba(140, 148, 255, 0.18);
   --surface-subtle: rgba(255, 255, 255, 0.06);
-  --surface-subtle-hover: rgba(96, 165, 250, 0.12);
-  --surface-subtle-strong: rgba(96, 165, 250, 0.16);
+  --surface-subtle-hover: rgba(140, 148, 255, 0.12);
+  --surface-subtle-strong: rgba(140, 148, 255, 0.16);
   --border-subtle: rgba(255, 255, 255, 0.1);
   --border-subtle-dashed: rgba(255, 255, 255, 0.14);
 
-  --sidebar-bg-color: rgba(24, 28, 40, 0.42);
-  --sidebar-logo-bg-color: rgba(24, 28, 40, 0.28);
+  --sidebar-bg-color: rgba(8, 8, 10, 0.9);
+  --sidebar-logo-bg-color: rgba(8, 8, 10, 0.9);
   --sidebar-hover-bg-color: rgba(255, 255, 255, 0.05);
   --sidebar-text-color: #a3a3a3;
   --sidebar-active-text-color: #ffffff;
   --sidebar-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
 
-  --glass-bg: rgba(24, 28, 40, 0.72);
+  --glass-bg: rgba(13, 13, 15, 0.9);
   --glass-bg-secondary: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: none;
@@ -324,7 +324,7 @@
   --bg-primary: var(--app-surface);
   --bg-tertiary: var(--app-surface-muted);
   --bg-hover: var(--app-accent-soft);
-  --bg-quinary: #091521;
+  --bg-quinary: #0d0d0f;
   --bg-error-light: #2b1719;
   --floating-surface: var(--app-surface);
   --floating-border: var(--app-border);
@@ -339,7 +339,7 @@
   --border-color: var(--app-border);
   --border-secondary: rgba(255, 255, 255, 0.06);
   --border-primary: var(--app-border-strong);
-  --border-hover: rgba(96, 165, 250, 0.4);
+  --border-hover: rgba(140, 148, 255, 0.4);
 
   --color-primary: var(--data-blue-base);
   --color-primary-light-3: var(--data-blue-dark-2);
@@ -378,13 +378,13 @@
   --color-info-light-9: var(--data-slate-light-9);
   --color-info-dark-2: var(--data-slate-dark-2);
 
-  --data-blue-base: #60a5fa;
-  --data-blue-dark-2: #93c5fd;
-  --data-blue-light-3: rgba(96, 165, 250, 0.38);
-  --data-blue-light-5: rgba(96, 165, 250, 0.3);
-  --data-blue-light-7: rgba(96, 165, 250, 0.24);
-  --data-blue-light-8: rgba(96, 165, 250, 0.18);
-  --data-blue-light-9: rgba(96, 165, 250, 0.14);
+  --data-blue-base: #8c94ff;
+  --data-blue-dark-2: #b4baff;
+  --data-blue-light-3: rgba(140, 148, 255, 0.38);
+  --data-blue-light-5: rgba(140, 148, 255, 0.3);
+  --data-blue-light-7: rgba(140, 148, 255, 0.24);
+  --data-blue-light-8: rgba(140, 148, 255, 0.18);
+  --data-blue-light-9: rgba(140, 148, 255, 0.14);
 
   --data-emerald-base: #34d399;
   --data-emerald-dark-2: #6ee7b7;
@@ -463,8 +463,8 @@
   --data-badge-danger-bg: rgba(248, 113, 113, 0.14);
   --data-badge-danger-border: rgba(248, 113, 113, 0.24);
   --data-badge-info-text: var(--data-blue-base);
-  --data-badge-info-bg: rgba(96, 165, 250, 0.14);
-  --data-badge-info-border: rgba(96, 165, 250, 0.24);
+  --data-badge-info-bg: rgba(140, 148, 255, 0.14);
+  --data-badge-info-border: rgba(140, 148, 255, 0.24);
   --data-badge-neutral-text: var(--data-slate-base);
   --data-badge-neutral-bg: rgba(148, 163, 184, 0.12);
   --data-badge-neutral-border: rgba(148, 163, 184, 0.2);
@@ -475,7 +475,7 @@
   --primary-solid: var(--data-blue-base);
   --primary-solid-hover: var(--data-blue-dark-2);
   --primary-solid-active: var(--data-blue-base);
-  --primary-ring: rgba(96, 165, 250, 0.28);
+  --primary-ring: rgba(140, 148, 255, 0.28);
   --count-badge-text: var(--data-badge-info-text);
   --shadow: none;
   --shadow-lg: none;
