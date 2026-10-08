@@ -19445,7 +19445,7 @@ describe('AccountsPage replacement flows', () => {
       await flushPromises();
     });
 
-    it('silently discards a stale reset rejection after a full quota refresh supersedes it', async () => {
+    it('does not let a summary refresh suppress an active reset-verification failure', async () => {
       const file = makeCodexFile('codex-stale-error.json', 'auth-stale-error', 'stale-error@example.com');
       mocks.files = [file];
       const storeKey = CODEX_CONFIG.getStoreKey?.(file) ?? file.name;
@@ -19492,8 +19492,8 @@ describe('AccountsPage replacement flows', () => {
         mocks.showNotification.mock.calls.some(
           ([message]) => typeof message === 'string' && message.includes('reset_verify_failed')
         )
-      ).toBe(false);
-      expect(applyCodexQuotaCommits()[storeKey].rateLimitResetCreditsError).not.toBe(
+      ).toBe(true);
+      expect(applyCodexQuotaCommits()[storeKey].rateLimitResetCreditsError).toBe(
         'old request failed'
       );
     });
