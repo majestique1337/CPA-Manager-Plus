@@ -3,7 +3,7 @@
 // on 127.0.0.1 so the dashboard can show spend, trend, models, projects and activity without
 // any proxy traffic. No dependencies. Read-only on ~/.claude and ~/.codex.
 import { createReadStream } from 'node:fs';
-import { readdir, stat } from 'node:fs/promises';
+import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
@@ -11,7 +11,8 @@ import { createInterface } from 'node:readline';
 
 const PORT = Number(process.env.LOCAL_USAGE_PORT ?? 18318);
 const REFRESH_MS = 5 * 60_000;
-const WINDOW_DAYS = 120;
+const WINDOW_DAYS = 400;
+const HISTORY_PATH = join(homedir(), '.local', 'share', 'cpamp-local-usage', 'history.json');
 const CLAUDE_DIR = join(homedir(), '.claude', 'projects');
 const CODEX_DIR = join(homedir(), '.codex', 'sessions');
 
@@ -138,6 +139,41 @@ async function parseCodex(path) {
   return records;
 }
 
+const tokensOf = (r) => r.in + r.out + r.cr + r.cw;
+
+// Claude Code deletes old transcripts. Keep our own daily rows so history outlives the logs: per day we
+// keep whichever copy (stored or freshly scanned) saw more tokens, which also covers half-deleted days.
+async function mergeHistory(fresh) {
+  let stored = [];
+  try {
+    stored = JSON.parse(await readFile(HISTORY_PATH, 'utf8')).rows ?? [];
+  } catch {
+    // first run
+  }
+  const byDate = (rows) => {
+    const map = new Map();
+    for (const r of rows) map.set(r.date, [...(map.get(r.date) ?? []), r]);
+    return map;
+  };
+  const sum = (list) => list.reduce((n, r) => n + tokensOf(r), 0);
+  const storedByDate = byDate(stored);
+  const freshByDate = byDate(fresh);
+  const merged = [];
+  for (const date of new Set([...storedByDate.keys(), ...freshByDate.keys()])) {
+    const a = storedByDate.get(date) ?? [];
+    const b = freshByDate.get(date) ?? [];
+    merged.push(...(sum(b) >= sum(a) ? b : a));
+  }
+  merged.sort((x, y) => x.date.localeCompare(y.date));
+  try {
+    await mkdir(join(HISTORY_PATH, '..'), { recursive: true });
+    await writeFile(HISTORY_PATH, JSON.stringify({ rows: merged }));
+  } catch (error) {
+    console.error('could not save history', error.message);
+  }
+  return merged;
+}
+
 const fileCache = new Map();
 let payload = { generatedAt: null, rows: [], scanning: true };
 
@@ -186,8 +222,9 @@ async function scan() {
       grouped.set(key, row);
     }
   }
-  const rows = [...grouped.values()].sort((a, b) => a.date.localeCompare(b.date));
-  for (const row of rows) row.cost = Math.round(row.cost * 1e4) / 1e4;
+  const fresh = [...grouped.values()];
+  for (const row of fresh) row.cost = Math.round(row.cost * 1e4) / 1e4;
+  const rows = await mergeHistory(fresh);
   payload = { generatedAt: Date.now(), rows, estimatedPrices: true, scanning: false };
   console.log(`scanned ${live.size} files -> ${rows.length} rows`);
 }

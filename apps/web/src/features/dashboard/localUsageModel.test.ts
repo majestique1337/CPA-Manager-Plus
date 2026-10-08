@@ -41,6 +41,8 @@ describe('summarizeLocalUsage', () => {
     expect(s.activeDays).toBe(3);
     expect(s.heat).toHaveLength(13);
     expect(s.heat[0]).toHaveLength(7);
+    expect(s.since).toBe('2026-10-04');
+    expect(s.coverageDays).toBe(5);
   });
 });
 

@@ -48,6 +48,9 @@ export interface LocalUsageSummary {
   streak: number;
   busiest: { date: string; tokens: number } | null;
   totalTokens: number;
+  /** Earliest day we have data for, so tiles can say how far back the numbers really go. */
+  since: string | null;
+  coverageDays: number;
 }
 
 export const TREND_DAYS = 30;
@@ -137,6 +140,10 @@ export const summarizeLocalUsage = (rows: LocalUsageRow[], now: Date = new Date(
     streak,
     busiest: busiestDay,
     totalTokens,
+    since: rows.length ? rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date) : null,
+    coverageDays: rows.length
+      ? Math.round((today.getTime() - new Date(`${rows.reduce((min, r) => (r.date < min ? r.date : min), rows[0].date)}T00:00:00`).getTime()) / 86_400_000) + 1
+      : 0,
   };
 };
 

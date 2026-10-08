@@ -26,7 +26,9 @@ export function SpendTile({ summary }: { summary: LocalUsageSummary }) {
   return (
     <section className={styles.tile}>
       <header className={styles.tileHead}>
-        <h2>{t('dashboard.spend', { defaultValue: 'Spend, last 30 days' })}</h2>
+        <h2>{summary.since && summary.coverageDays < 30
+            ? `Spend since ${shortDate(summary.since)}`
+            : t('dashboard.spend', { defaultValue: 'Spend, last 30 days' })}</h2>
       </header>
       <div>
         <div className={`${styles.spendValue} ${styles.numeral}`}>{fmtUsd(summary.spend)}</div>
@@ -151,7 +153,9 @@ export function HeatmapTile({ summary }: { summary: LocalUsageSummary }) {
   return (
     <section className={styles.tile}>
       <header className={styles.tileHead}>
-        <h2>{t('dashboard.activity', { defaultValue: 'Last 13 weeks' })}</h2>
+        <h2>{summary.since && summary.coverageDays < 91
+            ? `Since ${shortDate(summary.since)}`
+            : t('dashboard.activity', { defaultValue: 'Last 13 weeks' })}</h2>
       </header>
       <div className={styles.heatWrap}>
         <div className={styles.heat} role="img" aria-label="Daily activity, last 13 weeks">
