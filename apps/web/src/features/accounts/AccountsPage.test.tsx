@@ -19390,7 +19390,7 @@ describe('AccountsPage replacement flows', () => {
       expect(resetRequestCount).toBe(1);
 
       // 2. A 保持 pending
-      // 3. 对同 credential 启动另一个 quota request 从而 supersede A
+      // 3. A newer quota generation makes A unsuitable for consume verification.
       const batchRefreshButton = findButtonByText(renderer, 'accounts.refresh_quota');
       await act(async () => {
         batchRefreshButton.props.onClick();
@@ -19399,7 +19399,7 @@ describe('AccountsPage replacement flows', () => {
       await flushPromises();
       expect(summarySpy).toHaveBeenCalledTimes(1);
 
-      // 4. A 此时仍然存在于 single-flight Map，但已被 supersede
+      // 4. A remains in single-flight for display, but should not be reused for mutation.
       // 5. 在 A 尚未完成时启动 reset verification
       await openCodexQuotaTab(renderer, file.name);
       await act(async () => {
@@ -19408,7 +19408,7 @@ describe('AccountsPage replacement flows', () => {
       });
       await flushPromises();
 
-      // 6. verification 不得 reuse A
+      // 6. Verification must start a fresh request C rather than reuse A.
       // 7. 必须启动新的 reset-detail request C
       expect(resetRequestCount).toBe(2);
 

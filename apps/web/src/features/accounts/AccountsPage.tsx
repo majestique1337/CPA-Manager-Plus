@@ -483,6 +483,7 @@ type AccountHistoryLoadOutcome = { status: 'success' } | { status: 'error'; erro
 type CodexResetCreditRequestEntry = {
   promise: Promise<CodexResetCreditsData | null>;
   isCurrent: () => boolean;
+  quotaGenerationAtStart: number;
 };
 
 const toAccountQuotaRefreshOutcome = <TState, TData>(
@@ -5552,6 +5553,9 @@ export function AccountsPage() {
       }
 
       const cacheGeneration = captureQuotaCacheGeneration();
+      const quotaGenerationAtStart = quotaRequestVersionsRef.current.get(
+        `${CODEX_CONFIG.type}:${storeKey}`
+      ) ?? 0;
       const requestGate = beginAccountQuotaRequest(
         quotaRequestVersionsRef.current,
         CODEX_CONFIG.type + ':reset-credits:' + storeKey
@@ -5666,6 +5670,7 @@ export function AccountsPage() {
       const entry: CodexResetCreditRequestEntry = {
         promise: requestPromise,
         isCurrent: isCurrentRequest,
+        quotaGenerationAtStart,
       };
       codexResetCreditDetailRequestsRef.current.set(storeKey, entry);
       void requestPromise.finally(() => {
@@ -6982,13 +6987,18 @@ export function AccountsPage() {
       const cacheGeneration = captureQuotaCacheGeneration();
 
       const runResetTransaction = async () => {
-        // Consumption verification must read a fresh dedicated inventory.
-        // Never reuse a pending badge/Quota-tab observation for a mutation.
-        beginAccountQuotaRequest(
-          quotaRequestVersionsRef.current,
-          `${CODEX_CONFIG.type}:reset-credits:${storeKey}`
-        );
-        codexResetCreditDetailRequestsRef.current.delete(storeKey);
+        // A pending dedicated read can be reused for verification only when
+        // no quota refresh has started since it was issued. A newer quota
+        // generation requires a fresh read before any mutation.
+        const inFlight = codexResetCreditDetailRequestsRef.current.get(storeKey);
+        const quotaGeneration = quotaRequestVersionsRef.current.get(requestKey) ?? 0;
+        if (inFlight?.isCurrent() && inFlight.quotaGenerationAtStart !== quotaGeneration) {
+          beginAccountQuotaRequest(
+            quotaRequestVersionsRef.current,
+            `${CODEX_CONFIG.type}:reset-credits:${storeKey}`
+          );
+          codexResetCreditDetailRequestsRef.current.delete(storeKey);
+        }
         let fresh: CodexResetCreditsData | null;
         try {
           fresh = await loadCodexResetCreditDetails(row);
